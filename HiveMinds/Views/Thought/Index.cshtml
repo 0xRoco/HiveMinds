@@ -1,0 +1,159 @@
+@using HiveMinds.Services.Interfaces
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using System.Text.RegularExpressions
+@inject IUtility Utility;
+@model HiveMinds.ViewModels.Pages.ThoughtPageViewModel
+@{
+    ViewBag.Title = $"{Model.Thought.Username}: \"{Model.Thought.Content}\"";
+    Layout = "_Layout";
+}
+<div class="container">
+    <div class="list-group-item mb-4 p-4 border rounded shadow">
+        <div class="d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">
+                <a href="~/profile/@Model.Thought.Username" target="_blank" class="text-decoration-none">
+                    @@@Model.Thought.Username
+                    @if (Utility.IsUserVerified(Model.Thought.Username))
+                    {
+                        <i class="bi bi-patch-check-fill text-success me-1"></i>
+                    }
+                </a>
+            </h5>
+            <small class="text-muted">@Model.Thought.CreatedAt.ToLocalTime()</small>
+        </div>
+        @{
+            const string pattern = @"(@\w+)";
+            var content = Model.Thought.Content;
+            var parts = Regex.Split(content, pattern);
+        }
+
+        <p class="my-3">
+            @foreach (var i in parts)
+            {
+                if (Regex.IsMatch(i, pattern))
+                {
+                    var username = i[1..];
+                    <a href="~/profile/@username" target="_blank" class="text-decoration-none">@i</a>
+                }
+                else
+                {
+                    <span>@i</span>
+                }
+            }
+        </p>
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="likes-replies">
+                <span class="me-3">
+                    <i class="bi bi-heart"></i> <span class="badge bg-secondary">@Model.Thought.Likes?.Count</span>
+                </span>
+                <span>
+                    <i class="bi bi-reply"></i> <span class="badge bg-secondary">@Model.Thought.Replies?.Count</span>
+                </span>
+            </div>
+            @if (User.Identity is {IsAuthenticated: true})
+            {
+                <div class="mt-3">
+                    <form method="post">
+                        @if (Model.CurrentUser.Likes?.FirstOrDefault(x => x.ThoughtId == Model.Thought.Id) != null)
+                        {
+                            <button type="submit" class="btn btn-sm btn-outline-primary me-2" asp-action="Unlike" asp-route-id="@Model.Thought.Id">
+                                Unlike
+                            </button>
+                        }
+                        else
+                        {
+                            <button type="submit" class="btn btn-sm btn-outline-primary me-2" asp-action="Like" asp-route-id="@Model.Thought.Id">
+                                Like
+                            </button>
+                        }
+                        <button type="button" asp-action="Report" asp-controller="Thought" asp-route-id="@Model.Thought.Id" class="btn btn-sm btn-outline-danger">
+                            Report
+                        </button>
+                    </form>
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (User.Identity is {IsAuthenticated: true})
+    {
+        <div class="list-group mt-4">
+            <div class="list-group-item mb-4 p-4 border rounded shadow">
+                <h6 class="mb-3">Reply to this thought:</h6>
+                <form role="form" method="post">
+                    <div class="mb-3">
+                        <textarea class="form-control thought-post" name="Content" rows="2" minlength="5" maxlength="255" placeholder="Your reply..." required></textarea>
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary" asp-action="Reply" asp-route-id="@Model.Thought.Id">Post Reply</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    }
+    <div class="list-group mt-4">
+
+        @if (Model.Thought.Replies?.Count > 0)
+        {
+            @foreach (var reply in Model.Thought.Replies)
+            {
+                <div class="list-group-item mb-4 p-4 border rounded shadow">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h6 class="mb-0">
+                            <a href="~/profile/@reply.Username" target="_blank" class="text-decoration-none">
+                                @@@reply.Username
+                                @if (Utility.IsUserVerified(reply.Username))
+                                {
+                                    <i class="bi bi-patch-check-fill text-success me-1"></i>
+                                }
+                            </a>
+                        </h6>
+                        <small class="text-muted">@reply.CreatedAt.ToLocalTime()</small>
+                    </div>
+                    @{
+                        var replyContent = reply.Content;
+                        var replyParts = Regex.Split(replyContent, pattern);
+                    }
+
+                    <p class="my-3">
+                        @foreach (var i in replyParts)
+                        {
+                            if (Regex.IsMatch(i, pattern))
+                            {
+                                var username = i[1..];
+                                <a href="~/profile/@username" target="_blank" class="text-decoration-none">@i</a>
+                            }
+                            else
+                            {
+                                <span>@i</span>
+                            }
+                        }
+                    </p>
+                    @*<div class="d-flex justify-content-between align-items-center">
+                        <div class="likes-replies">
+                            <span class="me-3">
+                                <i class="bi bi-heart"></i> <span class="badge bg-secondary">@reply.Likes</span>
+                            </span>
+                        </div>
+                        @if (User.Identity is {IsAuthenticated: true})
+                        {
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-sm btn-outline-primary me-2">
+                                    Like
+                                </button>
+                            </div>
+                        }
+                    </div>*@
+                </div>
+            }
+        }
+        else
+        {
+            <div class="list-group-item mb-4 p-4 border rounded shadow">
+                <p class="text-center mb-0 text-muted">No replies yet.</p>
+            </div>
+        }
+
+
+    </div>
+</div>

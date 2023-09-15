@@ -1,0 +1,32 @@
+@model HiveMinds.ViewModels.UserViewModel
+@{
+    ViewData["Title"] = "Edit Profile";
+}
+
+<div class="container">
+    <h2>Edit Profile</h2>
+    
+    <form asp-action="Edit" method="post" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="profilePicture">Profile Picture</label>
+            <input type="file"  class="form-control" id="profilePicture" name="ProfilePicture" accept=".jpg, .jpeg, .png">
+        </div>
+        
+        <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" pattern="[a-zA-Z0-9_]{0,15}" class="form-control" id="username" name="Username" value="@Model.Username" readonly>
+        </div>
+        
+        <div class="form-group">
+            <label for="bio">Bio</label>
+            <textarea class="form-control no-resize-textarea" id="bio" name="Bio">@Model.Bio</textarea>
+        </div>
+        
+        <div class="form-group">
+            <label for="loyaltyStatement">Loyalty Statement</label>
+            <input type="text" class="form-control" id="loyaltyStatement" name="PartyLoyaltyStatement" value="@Model.PartyLoyaltyStatement">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+</div>

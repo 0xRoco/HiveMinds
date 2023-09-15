@@ -1,0 +1,43 @@
+@{
+    ViewData["Title"] = "System Settings";
+    Layout = "~/Views/Shared/_Layout.cshtml"; // Use your layout path
+}
+
+<div class="container-fluid">
+    <h1 class="mt-4">System Settings</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item active">System Settings</li>
+    </ol>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-cogs mr-1"></i>
+                    General Settings
+                </div>
+                <div class="card-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="languageSelect">Language</label>
+                            <select class="form-control" id="languageSelect">
+                                <option>English</option>
+                                <option>Newspeak</option>
+                                <!-- Add more language options here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="notificationSettings">Notification Settings</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="notificationSettings">
+                                <label class="form-check-label" for="notificationSettings">Enable Notifications</label>
+                            </div>
+                        </div>
+                        <!-- Add more system settings fields here -->
+                        <button type="submit" class="btn btn-primary">Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

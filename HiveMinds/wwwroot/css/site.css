@@ -1,0 +1,37 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
+  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.no-resize-textarea{
+  resize: none;
+}
+
+.logo-img {
+  display: block; /* Ensures proper rendering */
+  max-width: 200px; /* Adjust this to control the logo's maximum width */
+  height: auto; /* Maintain aspect ratio */
+  margin: 0 auto; /* Center the logo horizontally */
+}
+.card {
+  border: none; /* Remove card border for a cleaner look */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Add subtle shadow */
+}

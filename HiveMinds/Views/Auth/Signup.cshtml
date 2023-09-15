@@ -1,0 +1,82 @@
+@model HiveMinds.ViewModels.SignupViewModel
+@{
+    ViewData["Title"] = "Signup";
+}
+
+<div class="container">
+    <div class="row justify-content-center align-items-center">
+        <div class="col-md-6">
+            <div class="card p-4">
+                <div class="text-center mb-4">
+                    <img src="https://i.kym-cdn.com/photos/images/original/000/963/891/4ff.png" alt="HiveMinds Logo" class="logo-img"/>
+                </div>
+                <h3 class="mb-4 text-center">Signup</h3>
+                <form name="form" role="form" method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text">@@</span>
+                            <input type="text" pattern="[a-zA-Z0-9_]{0,15}" asp-for="Username" id="username" class="form-control" placeholder="Comrade123" required/>
+                        </div>
+                        <small id="usernameHelp" class="form-text text-muted">Choose a unique username that aligns with the Party's ideology.</small>
+                        <br/>
+                        <small id="usernameHelp2" class="form-text text-muted">Only text, numbers (up to 15 characters), and underscore (_) are accepted.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" asp-for="Email" id="email" placeholder="example@@hiveminds.com" class="form-control" required/>
+                        <small id="emailHelp" class="form-text text-muted">Enter a valid email address for account verification and communication..</small>
+
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" pattern=".{8,}" asp-for="Password" id="password" class="form-control" placeholder="Password" required/>
+                        <small id="passwordHelp" class="form-text text-muted">Set a strong password to safeguard your account from unauthorized access.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                        <input type="password" pattern=".{8,}" asp-for="ConfirmPassword" id="confirmPassword" class="form-control" placeholder="Password" required/>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Party Loyalty Statement</label>
+                        <textarea class="form-control" asp-for="PartyLoyaltyStatement" placeholder="Doublethink and Party loyalty in one!" required></textarea>
+                        <small id="statementHelp" class="form-text text-muted">Craft a statement that showcases your unwavering loyalty to the Party.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Bio</label>
+                        <textarea class="form-control" asp-for="Bio" placeholder="Dedicated to the Ministry of Love" required></textarea>
+                        <small id="bioHelp" class="form-text text-muted">Briefly describe your commitment to one of the Ministries.</small>
+
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number (Opt)</label>
+                        <input type="tel" pattern="^\d{3}-\d{3}-\d{4}$" asp-for="PhoneNumber" placeholder="123-456-7890" class="form-control" required/>
+                        <small id="phoneHelp" class="form-text text-muted">Provide your phone number for added account security.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Location (Opt)</label>
+                        <input type="text" placeholder="<Get location from IP Address>" class="form-control" required disabled/>
+                        <small id="locationHelp" class="form-text text-muted">Share your current location with the Party.</small>
+
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" id="tos" required/>
+                        <label class="form-check-label" for="tos">I agree to the Party's terms and conditions</label>
+                    </div>
+
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">Signup</button>
+                    </div>
+                </form>
+                <div class="mt-3 text-center">
+                    <div>Already have an account? <a asp-controller="Auth" asp-action="Login">Login</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
