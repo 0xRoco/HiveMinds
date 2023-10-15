@@ -40,8 +40,7 @@ public class ThoughtController : Controller
     {
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
-
-        var user = _accountRepo.GetByUsername(thought.Username);
+        var user = _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (user == null) return RedirectToAction("Index", "Home");
 
 
@@ -59,9 +58,9 @@ public class ThoughtController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Post(string content)
     {
-        if (User.Identity is { IsAuthenticated: false }) return RedirectToPage("/Login");
+        if (User.Identity is { IsAuthenticated: false }) return Challenge();
         var account = _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
-        if (account == null) return RedirectToPage("/Login");
+        if (account == null) return Challenge();
         await _thoughtService.CreateThought(account.Username, content);
         return Redirect(Request.Headers["Referer"].ToString());
     }
@@ -71,7 +70,7 @@ public class ThoughtController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Reply(int id, string content)
     {
-        if (User.Identity is { IsAuthenticated: false } or null) return RedirectToPage("/Login");
+        if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
         var user = _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return RedirectToPage("/Login");
         await _thoughtService.ReplyToThought(id, user.Username, content);
@@ -84,7 +83,7 @@ public class ThoughtController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Like(int id)
     {
-        if (User.Identity is { IsAuthenticated: false } or null) return RedirectToPage("/Login");
+        if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
 
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
@@ -99,7 +98,7 @@ public class ThoughtController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Unlike(int id)
     {
-        if (User.Identity is { IsAuthenticated: false } or null) return RedirectToPage("/Login");
+        if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
 
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
@@ -114,7 +113,7 @@ public class ThoughtController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Report(int id)
     {
-        if (User.Identity is { IsAuthenticated: false } or null) return RedirectToPage("/Login");
+        if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
 
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");

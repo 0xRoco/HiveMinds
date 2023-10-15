@@ -70,7 +70,7 @@ public class ThoughtService : IThoughtService
     {
         var user = _account.GetByUsername(username);
         if (user == null) return null;
-        var thoughtModels = await _thought.GetRepliesForUser(user.Id);
+        var thoughtModels = await _thought.GetThoughtsByUserId(user.Id);
         if (thoughtModels == null) return null;
         
         var thoughtsViewModel = new List<ThoughtViewModel>();

@@ -43,7 +43,7 @@ public class AccountRepository : IAccountRepository
 
     public Account? GetByUsername(string username)
     {
-        return _users.FirstOrDefault(u => u.Username == username);
+        return _users.AsNoTracking().FirstOrDefault(u => u.Username == username);
     }
 
     public bool Exists(string username)

@@ -97,7 +97,7 @@ public class ProfileController : Controller
         
         var vm = new ProfilePageViewModel()
         {
-            CurrentUser = await GetUserViewModel(User.Identity?.Name!),
+            CurrentUser = await GetUserViewModel(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty),
             Profile = profile
         };
         
