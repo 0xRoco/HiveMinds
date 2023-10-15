@@ -1,5 +1,3 @@
-using HiveMinds.API.Interfaces;
-using HiveMinds.API.Services;
 using HiveMinds.Common;
 using HiveMinds.Database;
 using HiveMinds.Extensions;
@@ -29,15 +27,18 @@ builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(build
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IVerificationService, VerificationService>();
-builder.Services.AddScoped<IAdminService, AdminService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<ISecurityService, SecurityService>();
-builder.Services.AddScoped<IThoughtRepository, ThoughtRepository>();
-builder.Services.AddScoped<IAccountRepository, AccountRepository>();
-builder.Services.AddScoped<IThoughtService, ThoughtService>();
-builder.Services.AddScoped<IUtility, Utility>();
+builder.Services.AddTransient<IAuthService, AuthService>();
+builder.Services.AddTransient<IVerificationService, VerificationService>();
+builder.Services.AddTransient<IAdminService, AdminService>();
+builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddTransient<ISecurityService, SecurityService>();
+builder.Services.AddTransient<IThoughtRepository, ThoughtRepository>();
+builder.Services.AddTransient<IAccountRepository, AccountRepository>();
+builder.Services.AddTransient<IThoughtService, ThoughtService>();
+
+builder.Services.AddTransient<IUtility, Utility>();
+
+builder.Services.AddTransient<IAccountFactory, AccountFactory>();
 
 builder.Services.AddLazyResolution();
 

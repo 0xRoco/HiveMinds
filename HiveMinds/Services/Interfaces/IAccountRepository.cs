@@ -1,6 +1,6 @@
 using HiveMinds.Models;
 
-namespace HiveMinds.API.Interfaces;
+namespace HiveMinds.Services.Interfaces;
 
 public interface IAccountRepository
 {

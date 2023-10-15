@@ -3,114 +3,178 @@ using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace HiveMinds.API.Services;
+namespace HiveMinds.Services;
 
 public class ThoughtRepository : IThoughtRepository
 {
 
     private readonly DatabaseContext _db;
-    private readonly DbSet<Thought> _thoughts;
-    private readonly DbSet<ThoughtLike> _thoughtLikes;
-    private readonly DbSet<ThoughtReply> _thoughtReplies;
     private readonly ILogger<ThoughtRepository> _logger;
     
     public ThoughtRepository(DatabaseContext db, ILogger<ThoughtRepository> logger)
     {
         _db = db;
-        _thoughts = _db.Set<Thought>();
-        _thoughtLikes = _db.Set<ThoughtLike>();
-        _thoughtReplies = _db.Set<ThoughtReply>();
         _logger = logger;
     }
 
-    public async Task<List<Thought>?> GetThoughts()
+    public async Task<IReadOnlyList<Thought>?> GetThoughts()
     {
-        return await _thoughts.ToListAsync();
+        return await _db.Thought.AsNoTracking().ToListAsync();
     }
 
     public async Task<Thought?> GetThoughtById(int id)
     {
-        return await _thoughts.FindAsync(id) ?? null;
+        return await _db.Thought.FindAsync(id);
     }
 
-    public async Task<List<Thought>?> GetThoughtByUserId(int id)
+    public async Task<List<Thought>?> GetThoughtsByUserId(int id)
     {
-        return await _thoughts.Where(x => x.UserId == id).ToListAsync();
+        return await _db.Thought.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
     }
 
     public async Task<bool> CreateThought(Thought thought)
     {
-        await _thoughts.AddAsync(thought);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            await _db.Thought.AddAsync(thought);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error creating thought");
+            return false;
+        }
     }
 
     public async Task<bool> UpdateThought(Thought thought)
     {
-        _thoughts.Update(thought);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            _db.Thought.Update(thought);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error updating thought");
+            return false;
+        }
     }
 
-    public async Task<bool> DeleteThought(Thought thought)
+    public async Task<bool> DeleteThought(int thoughtId)
     {
-        _thoughts.Remove(thought);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            var thought = await _db.Thought.FindAsync(thoughtId);
+            if (thought == null) return false;
+            _db.Thought.Remove(thought);
+            await _db.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting thought");
+            return false;
+        }
     }
 
     public async Task<List<ThoughtLike>?> GetLikesByThoughtId(int id)
     {
-        return await _thoughtLikes.Where(x => x.ThoughtId == id).ToListAsync();
+        return await _db.ThoughtLike.AsNoTracking().Where(x => x.ThoughtId == id).ToListAsync();
     }
 
-    public async Task<List<ThoughtLike>?> GetLikesByUserId(int id)
+    public async Task<List<ThoughtLike>?> GetLikesForUser(int id)
     {
-        return await _thoughtLikes.Where(x => x.UserId == id).ToListAsync();
+        return await _db.ThoughtLike.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
     }
 
     public async Task<bool> CreateLike(ThoughtLike thoughtLike)
     {
-        await _thoughtLikes.AddAsync(thoughtLike);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            await _db.ThoughtLike.AddAsync(thoughtLike);
+            await _db.SaveChangesAsync();
+            return true;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,"Error creating like");
+            return false;
+        }
     }
 
-    public async Task<bool> DeleteLike(ThoughtLike thoughtLike)
-    { 
-        _thoughtLikes.Remove(thoughtLike);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+    public async Task<bool> DeleteLike(int thoughtLikeId)
+    {
+        try
+        {
+            var thoughtLike = await _db.ThoughtLike.FindAsync(thoughtLikeId);
+            if (thoughtLike == null) return false;
+            _db.ThoughtLike.Remove(thoughtLike);
+            await _db.SaveChangesAsync();
+            return true;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting like");
+            return false;
+        }
     }
 
     public async Task<List<ThoughtReply>?> GetRepliesByThoughtId(int id)
     {
-        return await _thoughtReplies.Where(x => x.ThoughtId == id).ToListAsync();
+        return await _db.ThoughtReply.AsNoTracking().Where(x => x.ThoughtId == id).ToListAsync();
     }
 
-    public async Task<List<ThoughtReply>?> GetRepliesByUserId(int id)
+    public async Task<List<ThoughtReply>?> GetRepliesForUser(int id)
     {
-        return await _thoughtReplies.Where(x => x.UserId == id).ToListAsync();
+        return await _db.ThoughtReply.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
     }
 
     public async Task<bool> CreateReply(ThoughtReply thoughtReply)
     {
-        await _thoughtReplies.AddAsync(thoughtReply);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            await _db.ThoughtReply.AddAsync(thoughtReply);
+            await _db.SaveChangesAsync();
+            return true;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating reply");
+            return false;
+        }
     }
 
     public async Task<bool> UpdateReply(ThoughtReply thoughtReply)
     {
-        _thoughtReplies.Update(thoughtReply);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            _db.ThoughtReply.Update(thoughtReply);
+            await _db.SaveChangesAsync();
+            return true;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating reply");
+            return false;
+        }
     }
 
-    public async Task<bool> DeleteReply(ThoughtReply thoughtReply)
+    public async Task<bool> DeleteReply(int thoughtReplyId)
     {
-        _thoughtReplies.Remove(thoughtReply);
-        var result = await _db.SaveChangesAsync();
-        return result > 0;
+        try
+        {
+            var thoughtReply = await _db.ThoughtReply.FindAsync(thoughtReplyId);
+            if (thoughtReply == null) return false;
+            _db.ThoughtReply.Remove(thoughtReply);
+            await _db.SaveChangesAsync();
+            return true;
+        } 
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting reply");
+            return false;
+        }
     }
 }

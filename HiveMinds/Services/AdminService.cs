@@ -1,4 +1,3 @@
-using HiveMinds.API.Interfaces;
 using HiveMinds.Services.Interfaces;
 
 namespace HiveMinds.Services;
@@ -66,7 +65,7 @@ public class AdminService : IAdminService
             {
                 foreach (var reply in replies)
                 {
-                    await _thoughtRepository.DeleteReply(reply);
+                    await _thoughtRepository.DeleteReply(reply.Id);
                 }
             }
 
@@ -74,11 +73,11 @@ public class AdminService : IAdminService
             {
                 foreach (var like in likes)
                 {
-                    await _thoughtRepository.DeleteLike(like);
+                    await _thoughtRepository.DeleteLike(like.Id);
                 }
             }
             
-            await _thoughtRepository.DeleteThought(thought);
+            await _thoughtRepository.DeleteThought(thought.Id);
         }
     }
 }

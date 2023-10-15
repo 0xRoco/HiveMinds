@@ -1,6 +1,6 @@
-using HiveMinds.API.Interfaces;
 using HiveMinds.Database;
 using HiveMinds.Models;
+using HiveMinds.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace HiveMinds.Services;
@@ -23,27 +23,27 @@ public class AccountRepository : IAccountRepository
 
     public async Task<List<Account>> GetAll()
     {
-        return await _users.ToListAsync();
+        return await _users.AsNoTracking().ToListAsync();
     }
 
     public async Task<Account?> GetById(int id)
     {
-        return await _users.FindAsync(id) ?? null;
+        return await _users.FindAsync(id);
     }
 
     public async Task<Account?> GetByEmail(string email)
     {
-        return await _users.FirstOrDefaultAsync(u => u.Email == email) ?? null;
+        return await _users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
     }
 
     public async Task<Account?> GetByToken(string token)
     {
-        return await _users.FirstOrDefaultAsync(u => u.LoginToken == token) ?? null;
+        return await _users.FirstOrDefaultAsync(u => u.LoginToken == token);
     }
 
     public Account? GetByUsername(string username)
     {
-        return _users.FirstOrDefault(u => u.Username == username) ?? null;
+        return _users.FirstOrDefault(u => u.Username == username);
     }
 
     public bool Exists(string username)
@@ -113,6 +113,6 @@ public class AccountRepository : IAccountRepository
     private async Task ChangeUpdateTime(Account account)
     {
         account.UpdatedAt = DateTime.UtcNow;
-        await UpdateUser(account, false);
+        await _db.SaveChangesAsync();
     }
 }

@@ -1,4 +1,4 @@
-using HiveMinds.API.Interfaces;
+using System.Security.Claims;
 using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
@@ -60,10 +60,9 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Post(string content)
     {
         if (User.Identity is { IsAuthenticated: false }) return RedirectToPage("/Login");
-        var account = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var account = _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (account == null) return RedirectToPage("/Login");
         await _thoughtService.CreateThought(account.Username, content);
-        
         return Redirect(Request.Headers["Referer"].ToString());
     }
 

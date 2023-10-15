@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using HiveMinds.API.Interfaces;
+using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels.Pages.Admin;
 using Microsoft.AspNetCore.Authorization;
@@ -93,7 +93,7 @@ public class AdminController : Controller
         
         var vm = new AdminContentViewModel()
         {
-            Thoughts = await _thoughtRepository.GetThoughts()
+            Thoughts = (List<Thought>?)await _thoughtRepository.GetThoughts()
         };
 
         return View(vm);

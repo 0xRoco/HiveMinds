@@ -1,5 +1,4 @@
 using System.Security.Claims;
-using HiveMinds.API.Interfaces;
 using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
 using Microsoft.AspNetCore.Authentication;
@@ -32,10 +31,10 @@ public class AuthController : Controller
 
     [HttpGet]
     [Authorize]
-    public IActionResult Logout()
+    public async Task<IActionResult> Logout()
     {
         _logger.LogInformation($"User {User.Identity?.Name} logged out");
-        HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
     }
     
@@ -59,15 +58,13 @@ public class AuthController : Controller
             return View(loginModel);
         }
         
-        _logger.LogInformation($"Login attempt for {loginModel.Username}");
-        
         var result = await _auth.Login(loginModel);
         
         if (result == false)
         {
             _logger.LogInformation($"Login attempt for {loginModel.Username} failed");
             ModelState.AddModelError("Login", "Login attempt failed");
-            return View(loginModel);
+            return View(new LoginViewModel());
         }
         
         var user = _account.GetByUsername(loginModel.Username);
@@ -112,7 +109,6 @@ public class AuthController : Controller
             return View(signupModel);
         }
         
-        _logger.LogInformation($"Signup attempt for {signupModel.Username}");
         if (signupModel.Password != signupModel.ConfirmPassword)
         {
             ModelState.AddModelError("Signup", "Signup attempt failed - Passwords do not match");
@@ -125,7 +121,7 @@ public class AuthController : Controller
         {
             _logger.LogInformation($"Signup attempt for {signupModel.Username} failed");
             ModelState.AddModelError("Signup", "Signup attempt failed");
-            return View(signupModel);
+            return View(new SignupViewModel());
         }
         
         _logger.LogInformation($"User {signupModel.Username} signed up");
@@ -135,7 +131,5 @@ public class AuthController : Controller
             Username = signupModel.Username,
             Password = signupModel.Password
         });
-        
-        return RedirectToAction("Index", "Home");
     }
 }

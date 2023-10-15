@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using HiveMinds.API.Interfaces;
 using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
@@ -71,7 +70,7 @@ public class ThoughtService : IThoughtService
     {
         var user = _account.GetByUsername(username);
         if (user == null) return null;
-        var thoughtModels = await _thought.GetThoughtByUserId(user.Id);
+        var thoughtModels = await _thought.GetRepliesForUser(user.Id);
         if (thoughtModels == null) return null;
         
         var thoughtsViewModel = new List<ThoughtViewModel>();
@@ -120,7 +119,7 @@ public class ThoughtService : IThoughtService
     {
         var thought = await _thought.GetThoughtById(thoughtId);
         if (thought == null) return false;
-        var result = await _thought.DeleteThought(thought);
+        var result = await _thought.DeleteThought(thoughtId);
         return result;
     }
 
@@ -151,7 +150,7 @@ public class ThoughtService : IThoughtService
     {
         var user = await _account.GetById(userId);
         if (user == null) return null;
-        var replies = await _thought.GetRepliesByUserId(userId);
+        var replies = await _thought.GetRepliesForUser(userId);
         if (replies == null) return null;
         var repliesViewModel = replies.Select(reply => new ThoughtReplyViewModel
             {
@@ -203,7 +202,7 @@ public class ThoughtService : IThoughtService
     
     public async Task<List<ThoughtLike>?> GetLikesByUserId(int userId)
     {
-        var likes = await _thought.GetLikesByUserId(userId);
+        var likes = await _thought.GetLikesForUser(userId);
         return likes;
     }
     public async Task<bool> LikeThought(int thoughtId, string username)
@@ -237,7 +236,7 @@ public class ThoughtService : IThoughtService
         var like = likes?.FirstOrDefault(x=> x.UserId == user.Id);
         if (like == null) return false;
         
-        var result = await _thought.DeleteLike(like);
+        var result = await _thought.DeleteLike(like.Id);
         
         return result;
     }

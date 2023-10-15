@@ -1,5 +1,5 @@
+using System.Security.Claims;
 using AutoMapper;
-using HiveMinds.API.Interfaces;
 using HiveMinds.Common;
 using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
@@ -19,7 +19,6 @@ public class HomeController : Controller
     private readonly IThoughtService _thoughtService;
     private readonly IUtility _utility;
     private readonly IOptions<HiveMindsSettings> _settings;
-    private readonly HomeViewModel _vm = new();
 
     public HomeController(ILogger<HomeController> logger, IThoughtService thoughtService, IAccountRepository accountRepo, IUtility utility, IOptions<HiveMindsSettings> settings)
     {
@@ -34,18 +33,19 @@ public class HomeController : Controller
     [Authorize]
     public async Task<IActionResult> Index()
     {
-        if (User.Identity is { IsAuthenticated: false }) return RedirectToPage("/Login");
-        var account =  _accountRepo.GetByUsername(User.Identity?.Name!);
+        if (User.Identity is { IsAuthenticated: false }) return Challenge();
+        var account =  _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (account == null)
         {
             await HttpContext.SignOutAsync();
-            return View();
+            return Challenge();
         }
-        _vm.User = await _utility.GetUserViewModel(account);
-        _vm.Thoughts = await _thoughtService.GetThoughts();
-        
-        _logger.LogInformation($"{_settings.Value.DefaultProfilePicture} | {_settings.Value.EmailConfig.Username}");
-        return View(_vm);
+        var vm = new HomeViewModel
+        {
+            User = await _utility.GetUserViewModel(account),
+            Thoughts = await _thoughtService.GetThoughts()
+        };
+        return View(vm);
     }
     
 }

@@ -3,13 +3,13 @@ using System.Text;
 using HiveMinds.Services.Interfaces;
 using Konscious.Security.Cryptography;
 
-namespace HiveMinds.API.Services;
+namespace HiveMinds.Services;
 
 public class SecurityService : ISecurityService
 {
-    public byte[] CreateSalt()
+    public byte[] CreateSalt(int size = 128)
     {
-        var buffer = new byte[128];
+        var buffer = new byte[size];
         using var rng = RandomNumberGenerator.Create();
         rng.GetBytes(buffer);
         return buffer;
