@@ -8,8 +8,8 @@ public interface IAccountRepository
     Task<Account?> GetById(int id);
     Task<Account?> GetByEmail(string email);
     Task<Account?> GetByToken(string token);
-    Account? GetByUsername(string username);
-    bool Exists(string username);
+    Task<Account?> GetByUsername(string username);
+    Task<bool> Exists(string username);
     Task<bool> CreateUser(Account account);
     Task<bool> UpdateUser(Account account, bool changeUpdateTime = true);
     Task<bool> DeleteUser(Account account); 

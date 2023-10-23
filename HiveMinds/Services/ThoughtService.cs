@@ -68,7 +68,7 @@ public class ThoughtService : IThoughtService
     
     public async Task<List<ThoughtViewModel>?> GetThoughtsByUsername(string username)
     {
-        var user = _account.GetByUsername(username);
+        var user = await _account.GetByUsername(username);
         if (user == null) return null;
         var thoughtModels = await _thought.GetThoughtsByUserId(user.Id);
         if (thoughtModels == null) return null;
@@ -96,7 +96,7 @@ public class ThoughtService : IThoughtService
     
     public async Task<bool> CreateThought(string username, string body)
     {
-        var user = _account.GetByUsername(username);
+        var user = await _account.GetByUsername(username);
         if (user == null) return false;
         var thought = new Thought
         {
@@ -168,7 +168,7 @@ public class ThoughtService : IThoughtService
     public async Task<bool> ReplyToThought(int thoughtId,string username, string body)
     {
         var thought = await _thought.GetThoughtById(thoughtId);
-        var user = _account.GetByUsername(username);
+        var user = await _account.GetByUsername(username);
         if (thought == null || user == null) return false;
         var reply = new ThoughtReply
         {
@@ -208,8 +208,8 @@ public class ThoughtService : IThoughtService
     public async Task<bool> LikeThought(int thoughtId, string username)
     {
         var thought = await _thought.GetThoughtById(thoughtId);
-        var user = _account.GetByUsername(username);
-        if (thought == null || user == null) return false;
+        var user = await _account.GetByUsername(username);
+        if (thought == null) return false;
         if (await LikeExists(thoughtId, user.Id)) return false;
         
         var like = new ThoughtLike
@@ -227,7 +227,7 @@ public class ThoughtService : IThoughtService
     public async Task<bool> UnlikeThought(int thoughtId, string username)
     {
         var thought = await _thought.GetThoughtById(thoughtId);
-        var user = _account.GetByUsername(username);
+        var user = await _account.GetByUsername(username);
         if (thought == null || user == null) return false;
         if (!await LikeExists(thoughtId, user.Id)) return false;
         

@@ -19,7 +19,7 @@ public class VerificationService : IVerificationService
 
     public async Task<bool> RequestVerification(string username, string reason)
     {
-        var account = _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null)
         {
             return false;
@@ -72,7 +72,7 @@ public class VerificationService : IVerificationService
 
     public async Task<bool> VerifyUser(string username)
     {
-        var account = _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null)
         {
             return false;
@@ -86,7 +86,7 @@ public class VerificationService : IVerificationService
 
     public async Task<bool> VerifyEmail(string username, string code)
     {
-        var account = _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null || account.EmailCode != code)
         {
             return false;
@@ -101,7 +101,7 @@ public class VerificationService : IVerificationService
 
     public async Task<bool> VerifyPhoneNumber(string username, string code)
     {
-        var account = _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null || account.PhoneNumberCode != code)
         {
             return false;
@@ -116,7 +116,7 @@ public class VerificationService : IVerificationService
 
     public async Task<bool> SendEmailVerification(string username)
     {
-        var account = _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null) return false;
 
         const string subject = "Verify Your HiveMinds Account - Action Required";

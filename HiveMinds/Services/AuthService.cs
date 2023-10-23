@@ -24,7 +24,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> Signup(SignupViewModel model, bool login = false)
     {
-        if (_accountRepository.Exists(model.Username))
+        if (await _accountRepository.Exists(model.Username))
         {
             return false;
         }
@@ -42,7 +42,7 @@ public class AuthService : IAuthService
 
     public async Task<bool> Login(LoginViewModel model)
     {
-        var account = _accountRepository.GetByUsername(model.Username);
+        var account = await _accountRepository.GetByUsername(model.Username);
         if (account == null)
         {
             return false;

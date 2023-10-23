@@ -8,7 +8,7 @@
         <h5 class="mb-0">
             <a href="~/profile/@Model.Item1.Username" target="_blank" class="text-decoration-none">
                 @@@Model.Item1.Username
-                @if (Utility.IsUserVerified(Model.Item1.Username))
+                @if (await Utility.IsUserVerified(Model.Item1.Username))
                 {
                     <i class="bi bi-patch-check-fill text-success me-1"></i>
                 }

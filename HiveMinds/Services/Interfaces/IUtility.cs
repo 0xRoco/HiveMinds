@@ -6,11 +6,12 @@ namespace HiveMinds.Services.Interfaces;
 
 public interface IUtility
 {
+    [Obsolete("L", true)]
     Task<UserViewModel> GetUserViewModel(Account account);
     Task<ThoughtViewModel> GetThoughtViewModel(Thought thought);
-    bool IsUserVerified(string username);
+    Task<bool> IsUserVerified(string username);
     
-    bool IsUserBanned(string username);
-    bool IsUserAdmin(string username);
+    Task<bool> IsUserBanned(string username);
+    Task<bool> IsUserAdmin(string username);
     
     Task<VerificationStatus> GetUserVerificationStatus(string username); }

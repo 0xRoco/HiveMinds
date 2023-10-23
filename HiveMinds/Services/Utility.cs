@@ -56,28 +56,27 @@ public class Utility : IUtility
         return thoughtViewModel;
     }
 
-    public bool IsUserVerified(string username)
+    public async Task<bool> IsUserVerified(string username)
     {
-        var account =  _accountRepository.Value.GetByUsername(username);
+        var account = await _accountRepository.Value.GetByUsername(username);
         return account is { IsVerified: true };
     }
 
-    public bool IsUserBanned(string username)
+    public async Task<bool> IsUserBanned(string username)
     {
-        var account =  _accountRepository.Value.GetByUsername(username);
-        if (account == null) return false;
-        return false;
+        var account = await _accountRepository.Value.GetByUsername(username);
+        return account == null && false;
     }
 
-    public bool IsUserAdmin(string username)
+    public async Task<bool> IsUserAdmin(string username)
     {
-        var account =  _accountRepository.Value.GetByUsername(username);
+        var account =  await _accountRepository.Value.GetByUsername(username);
         return account is { IsAdmin: true };
     }
 
     public async Task<VerificationStatus> GetUserVerificationStatus(string username)
     {
-        var account =  _accountRepository.Value.GetByUsername(username);
+        var account =  await _accountRepository.Value.GetByUsername(username);
         if (account == null) return VerificationStatus.None;
         var request = await _accountRepository.Value.GetVerificationRequestsByUserId(account.Id);
         return request?.Status ?? VerificationStatus.None;

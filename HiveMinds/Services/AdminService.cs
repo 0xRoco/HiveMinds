@@ -35,7 +35,7 @@ public class AdminService : IAdminService
 
     public async Task<bool> VerifyUser(string username)
     {
-        var account =  _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null) return false;
         account.IsVerified = true;
         return await _accountRepository.UpdateUser(account);
@@ -43,7 +43,7 @@ public class AdminService : IAdminService
 
     public async Task<bool> UnVerifyUser(string username)
     {
-        var account =  _accountRepository.GetByUsername(username);
+        var account = await _accountRepository.GetByUsername(username);
         if (account == null) return false;
         account.IsVerified = false;
         return await _accountRepository.UpdateUser(account);

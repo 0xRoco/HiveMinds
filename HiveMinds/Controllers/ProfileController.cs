@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using HiveMinds.Adapters.Interfaces;
 using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
 using HiveMinds.ViewModels.Pages;
@@ -16,16 +17,16 @@ public class ProfileController : Controller
     private readonly IVerificationService _verification;
     private readonly IAccountRepository _accountRepo;
     private readonly IThoughtService _thoughtRepo;
-    private readonly IUtility _utility;
+    private readonly IModelToViewModelAdapter _modelToView;
 
-    public ProfileController(IThoughtService thoughtRepo, IAccountRepository accountRepo, IAuthService auth, ILogger<ProfileController> logger, IUtility utility, IVerificationService verification)
+    public ProfileController(IThoughtService thoughtRepo, IAccountRepository accountRepo, IAuthService auth, ILogger<ProfileController> logger, IVerificationService verification, IModelToViewModelAdapter modelToView)
     {
         _thoughtRepo = thoughtRepo;
         _accountRepo = accountRepo;
         _auth = auth;
         _logger = logger;
-        _utility = utility;
         _verification = verification;
+        _modelToView = modelToView;
     }
 
 
@@ -36,9 +37,9 @@ public class ProfileController : Controller
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
         
-        var user = _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var user = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (user == null) return NotFound();
-        var profile = await _utility.GetUserViewModel(user);
+        var profile = await _modelToView.GetUserViewModel(user);
 
         var vm = new ProfilePageViewModel()
         {
@@ -56,9 +57,9 @@ public class ProfileController : Controller
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
         
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
-        var profile = await _utility.GetUserViewModel(user);
+        var profile = await _modelToView.GetUserViewModel(user);
         return View(profile);
     }
 
@@ -69,7 +70,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> Edit(UserViewModel profile)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         user.Bio = profile.Bio;
@@ -91,13 +92,15 @@ public class ProfileController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index(string username)
     {
-        var user = _accountRepo.GetByUsername(username);
+        var user = await _accountRepo.GetByUsername(username);
         if (user == null) return NotFound();
-        var profile = await _utility.GetUserViewModel(user);
+        var profile = await _modelToView.GetUserViewModel(user);
+        
+        var localUser = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         
         var vm = new ProfilePageViewModel()
         {
-            CurrentUser = await GetUserViewModel(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty),
+            CurrentUser = await _modelToView.GetUserViewModel(localUser),
             Profile = profile
         };
         
@@ -110,7 +113,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsEmailVerified) return RedirectToAction("Index");
@@ -123,7 +126,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail(string verificationCode)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsEmailVerified) return RedirectToAction("Index");
@@ -139,7 +142,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> Verify()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsVerified) return RedirectToAction("Index");
@@ -153,7 +156,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> Verify(string reason)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsVerified) return RedirectToAction("Index");
@@ -161,15 +164,6 @@ public class ProfileController : Controller
         var result = await _verification.RequestVerification(user.Username, reason);
         if (!result) return View();
         return RedirectToAction("Index");
-    }
-
-    private async Task<UserViewModel> GetUserViewModel(string username)
-    {
-        var user = _accountRepo.GetByUsername(username);
-        if (user == null) return new UserViewModel();
-        
-        var profile = await _utility.GetUserViewModel(user);
-        return profile;
     }
     
 }

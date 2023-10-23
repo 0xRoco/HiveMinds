@@ -37,7 +37,7 @@
                         <h5 class="mb-0">
                             <a href="~/profile/@thought.Username" target="_blank" class="text-decoration-none">
                                 @@@thought.Username
-                                @if (Utility.IsUserVerified(thought.Username))
+                                @if (await Utility.IsUserVerified(thought.Username))
                                 {
                                     <i class="bi bi-patch-check-fill text-success me-1"></i>
                                 }

@@ -67,7 +67,7 @@ public class AuthController : Controller
             return View(new LoginViewModel());
         }
         
-        var user = _account.GetByUsername(loginModel.Username);
+        var user = await _account.GetByUsername(loginModel.Username);
         if (user == null)
         {
             _logger.LogInformation($"User {loginModel.Username} not found");

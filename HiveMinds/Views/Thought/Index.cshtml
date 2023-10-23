@@ -12,7 +12,7 @@
             <h5 class="mb-0">
                 <a href="~/profile/@Model.Thought.Username" target="_blank" class="text-decoration-none">
                     @@@Model.Thought.Username
-                    @if (Utility.IsUserVerified(Model.Thought.Username))
+                    @if (await Utility.IsUserVerified(Model.Thought.Username))
                     {
                         <i class="bi bi-patch-check-fill text-success me-1"></i>
                     }
@@ -101,7 +101,7 @@
                         <h6 class="mb-0">
                             <a href="~/profile/@reply.Username" target="_blank" class="text-decoration-none">
                                 @@@reply.Username
-                                @if (Utility.IsUserVerified(reply.Username))
+                                @if (await Utility.IsUserVerified(reply.Username))
                                 {
                                     <i class="bi bi-patch-check-fill text-success me-1"></i>
                                 }

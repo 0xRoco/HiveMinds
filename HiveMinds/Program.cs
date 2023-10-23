@@ -1,4 +1,7 @@
+using HiveMinds.Adapters;
+using HiveMinds.Adapters.Interfaces;
 using HiveMinds.Common;
+using HiveMinds.Common.AutoMapper;
 using HiveMinds.Database;
 using HiveMinds.Extensions;
 using HiveMinds.Services;
@@ -19,11 +22,12 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 
 builder.Services.AddOptions();
 builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.Configure<HiveMindsSettings>(builder.Configuration.GetSection("HiveMindsSettings"));
 
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Environment.IsDevelopment()
     ? builder.Configuration.GetConnectionString("LocalConnection") ?? "NULL"
-    : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"));
+    : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"), ServiceLifetime.Transient);
 
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
@@ -39,7 +43,7 @@ builder.Services.AddTransient<IThoughtService, ThoughtService>();
 builder.Services.AddTransient<IUtility, Utility>();
 
 builder.Services.AddTransient<IAccountFactory, AccountFactory>();
-
+builder.Services.AddTransient<IModelToViewModelAdapter, ModelToViewModelAdapter>();
 builder.Services.AddLazyResolution();
 
 

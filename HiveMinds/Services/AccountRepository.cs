@@ -38,17 +38,17 @@ public class AccountRepository : IAccountRepository
 
     public async Task<Account?> GetByToken(string token)
     {
-        return await _users.FirstOrDefaultAsync(u => u.LoginToken == token);
+        return await _users.AsNoTracking().FirstOrDefaultAsync(u => u.LoginToken == token);
     }
 
-    public Account? GetByUsername(string username)
+    public async Task<Account?> GetByUsername(string username)
     {
-        return _users.AsNoTracking().FirstOrDefault(u => u.Username == username);
+        return await _users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username);
     }
 
-    public bool Exists(string username)
+    public async Task<bool> Exists(string username)
     {
-        return _users.Any(u => u.Username == username);
+        return await _users.AsNoTracking().AnyAsync(u => u.Username == username);
     }
 
     public async Task<bool> CreateUser(Account account)
@@ -60,9 +60,9 @@ public class AccountRepository : IAccountRepository
 
     public async Task<bool> UpdateUser(Account account, bool changeUpdateTime = true)
     {
+        if (changeUpdateTime) await ChangeUpdateTime(account);
         _db.Entry(account).State = EntityState.Modified;
         var result = await _db.SaveChangesAsync();
-        if (changeUpdateTime) await ChangeUpdateTime(account);
         return result > 0;
     }
 
@@ -71,6 +71,7 @@ public class AccountRepository : IAccountRepository
     /// </summary>
     public async Task<bool> DeleteUser(Account account)
     {
+        if (!await Exists(account.Username)) return false;
         _users.Remove(account);
         var result = await _db.SaveChangesAsync();
         return result > 0;
@@ -78,17 +79,17 @@ public class AccountRepository : IAccountRepository
 
     public async Task<List<VerificationRequest>> GetVerificationRequests()
     {
-        return await _verificationRequests.ToListAsync();
+        return await _verificationRequests.AsNoTracking().ToListAsync();
     }
 
     public async Task<VerificationRequest?> GetVerificationRequestById(int id)
     {
-        return await _verificationRequests.FindAsync(id) ?? null;
+        return await _verificationRequests.FindAsync(id);
     }
 
     public async Task<VerificationRequest?> GetVerificationRequestsByUserId(int userId)
     {
-        return await _verificationRequests.FirstOrDefaultAsync(v => v.UserId == userId) ?? null;
+        return await _verificationRequests.AsNoTracking().FirstOrDefaultAsync(v => v.UserId == userId);
     }
 
     public async Task<bool> CreateVerificationRequest(VerificationRequest request)
@@ -108,7 +109,8 @@ public class AccountRepository : IAccountRepository
     public async Task UpdateLastLogin(Account account)
     {
         account.LastLoginAt = DateTime.UtcNow;
-        await UpdateUser(account);    }
+        await _db.SaveChangesAsync(); 
+    }
     
     private async Task ChangeUpdateTime(Account account)
     {
