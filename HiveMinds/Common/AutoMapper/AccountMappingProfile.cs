@@ -1,4 +1,5 @@
 using AutoMapper;
+using HiveMinds.DTO;
 using HiveMinds.Models;
 using HiveMinds.ViewModels;
 
@@ -16,5 +17,6 @@ public class AccountMappingProfile : Profile
             .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => src.IsVerified))
             .ForMember(dest => dest.Joined, opt => opt.MapFrom(src => src.CreatedAt))
             .ForMember(dest => dest.LastSeen, opt => opt.MapFrom(src => src.LastLoginAt));
+            
     }
 }

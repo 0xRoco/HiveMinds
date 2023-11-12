@@ -105,7 +105,6 @@ public class ThoughtService : IThoughtService
             ParentThoughtId = -1,
             UserId = user.Id,
             Content = body,
-            Likes = 0,
             CreatedAt = DateTime.UtcNow,
             Flagged = false
         };

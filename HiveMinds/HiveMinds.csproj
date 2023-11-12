@@ -36,6 +36,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HiveMinds.Database\HiveMinds.Database.csproj" />
+      <ProjectReference Include="..\HiveMinds.DTO\HiveMinds.DTO.csproj" />
       <ProjectReference Include="..\HiveMinds.Models\HiveMinds.Models.csproj" />
       <ProjectReference Include="..\HiveMinds.ViewModels\HiveMinds.ViewModels.csproj" />
     </ItemGroup>

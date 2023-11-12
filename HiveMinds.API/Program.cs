@@ -1,3 +1,5 @@
+using HiveMinds.API.Services;
+using HiveMinds.API.Services.Interfaces;
 using HiveMinds.Database;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +12,15 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddAutoMapper(typeof(Program));
+
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Environment.IsDevelopment()
     ? builder.Configuration.GetConnectionString("LocalConnection") ?? "NULL"
-    : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"));
+    : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"), ServiceLifetime.Transient);
+
+builder.Services.AddTransient<IAccountRepository, AccountRepository>();
+builder.Services.AddTransient<IThoughtRepository, ThoughtRepository>();
+builder.Services.AddTransient<IThoughtService, ThoughtService>();
 
 var app = builder.Build();
 

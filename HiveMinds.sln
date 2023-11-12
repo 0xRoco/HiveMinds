@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.DataTypes", "Hive
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.ViewModels", "HiveMinds.ViewModels\HiveMinds.ViewModels.csproj", "{BA53A6C1-6DD5-4447-91FD-F7EC56A15F7E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.DTO", "HiveMinds.DTO\HiveMinds.DTO.csproj", "{DD7427C8-7946-43A9-87EB-240D68CF1610}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.Tests", "HiveMinds.Tests\HiveMinds.Tests.csproj", "{DAFCC02D-B4A7-43E9-82D9-434F535EE68C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -42,5 +46,13 @@ Global
 		{BA53A6C1-6DD5-4447-91FD-F7EC56A15F7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BA53A6C1-6DD5-4447-91FD-F7EC56A15F7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BA53A6C1-6DD5-4447-91FD-F7EC56A15F7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DD7427C8-7946-43A9-87EB-240D68CF1610}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD7427C8-7946-43A9-87EB-240D68CF1610}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD7427C8-7946-43A9-87EB-240D68CF1610}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD7427C8-7946-43A9-87EB-240D68CF1610}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DAFCC02D-B4A7-43E9-82D9-434F535EE68C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DAFCC02D-B4A7-43E9-82D9-434F535EE68C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DAFCC02D-B4A7-43E9-82D9-434F535EE68C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DAFCC02D-B4A7-43E9-82D9-434F535EE68C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

@@ -1,5 +1,4 @@
-using HiveMinds.Models;
-using HiveMinds.ViewModels;
+using HiveMinds.DTO;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiveMinds.API.Controllers
@@ -10,13 +9,13 @@ namespace HiveMinds.API.Controllers
     {
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginViewModel model)
+        public async Task<ActionResult> Login([FromBody] LoginDto model)
         {
             return Ok();
         }
 
         [HttpPost("signup")]
-        public async Task<IActionResult> Signup([FromBody] SignupViewModel model)
+        public async Task<ActionResult> Signup([FromBody] SignupDto model)
         {
             return Ok();
         }

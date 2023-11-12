@@ -7,6 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <PackageReference Include="AutoMapper" Version="12.0.1" />
+        <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
         <PackageReference Include="Konscious.Security.Cryptography.Argon2" Version="1.3.0" />
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.10"/>
         <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.10" />
@@ -15,8 +17,11 @@
 
     <ItemGroup>
       <ProjectReference Include="..\HiveMinds.Database\HiveMinds.Database.csproj" />
+      <ProjectReference Include="..\HiveMinds.DTO\HiveMinds.DTO.csproj" />
       <ProjectReference Include="..\HiveMinds.ViewModels\HiveMinds.ViewModels.csproj" />
+
     </ItemGroup>
+
 
 
 

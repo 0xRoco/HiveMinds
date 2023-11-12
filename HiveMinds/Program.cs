@@ -1,7 +1,6 @@
 using HiveMinds.Adapters;
 using HiveMinds.Adapters.Interfaces;
 using HiveMinds.Common;
-using HiveMinds.Common.AutoMapper;
 using HiveMinds.Database;
 using HiveMinds.Extensions;
 using HiveMinds.Services;
@@ -28,8 +27,6 @@ builder.Services.Configure<HiveMindsSettings>(builder.Configuration.GetSection("
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Environment.IsDevelopment()
     ? builder.Configuration.GetConnectionString("LocalConnection") ?? "NULL"
     : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"), ServiceLifetime.Transient);
-
-builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddTransient<IVerificationService, VerificationService>();
