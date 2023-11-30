@@ -14,19 +14,19 @@ public class ProfileController : Controller
     
     private readonly ILogger<ProfileController> _logger;
     private readonly IAuthService _auth;
-    private readonly IVerificationService _verification;
-    private readonly IAccountRepository _accountRepo;
-    private readonly IThoughtService _thoughtRepo;
     private readonly IModelToViewModelAdapter _modelToView;
+    private readonly IUserService _userService;
+    private readonly IThoughtService _thoughtService;
 
-    public ProfileController(IThoughtService thoughtRepo, IAccountRepository accountRepo, IAuthService auth, ILogger<ProfileController> logger, IVerificationService verification, IModelToViewModelAdapter modelToView)
+    public ProfileController(IAuthService auth,
+        ILogger<ProfileController> logger, IModelToViewModelAdapter modelToView,
+        IUserService userService, IThoughtService thoughtService)
     {
-        _thoughtRepo = thoughtRepo;
-        _accountRepo = accountRepo;
         _auth = auth;
         _logger = logger;
-        _verification = verification;
         _modelToView = modelToView;
+        _userService = userService;
+        _thoughtService = thoughtService;
     }
 
 
@@ -36,8 +36,8 @@ public class ProfileController : Controller
     public async Task<IActionResult> Index()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        
-        var user = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+
+        var user = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
 
@@ -56,8 +56,8 @@ public class ProfileController : Controller
     public async Task<IActionResult> Edit()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
         return View(profile);
@@ -70,13 +70,13 @@ public class ProfileController : Controller
     public async Task<IActionResult> Edit(UserViewModel profile)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         user.Bio = profile.Bio;
         user.LoyaltyStatement = profile.PartyLoyaltyStatement;
-        
-        var result = await _accountRepo.UpdateUser(user);
+
+        var result = false; //await _accountRepo.UpdateUser(user);
         
         if (!result)
         {
@@ -92,12 +92,12 @@ public class ProfileController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index(string username)
     {
-        var user = await _accountRepo.GetByUsername(username);
+        var user = await _userService.GetUser(username);
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
-        
-        var localUser = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
-        
+
+        var localUser = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        if (localUser == null) return NotFound();
         var vm = new ProfilePageViewModel()
         {
             CurrentUser = await _modelToView.GetUserViewModel(localUser),
@@ -113,10 +113,9 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
         
-        if (user.IsEmailVerified) return RedirectToAction("Index");
         return View();
     }
 
@@ -126,12 +125,10 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail(string verificationCode)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
-        
-        if (user.IsEmailVerified) return RedirectToAction("Index");
-        
-        var result = await _verification.VerifyEmail(user.Username, verificationCode);
+
+        var result = false; //await _verification.VerifyEmail(user.Username, verificationCode);
         if (!result) return View();
         return RedirectToAction("Index");
     }
@@ -142,7 +139,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> Verify()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsVerified) return RedirectToAction("Index");
@@ -156,12 +153,12 @@ public class ProfileController : Controller
     public async Task<IActionResult> Verify(string reason)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return NotFound();
         
         if (user.IsVerified) return RedirectToAction("Index");
 
-        var result = await _verification.RequestVerification(user.Username, reason);
+        var result = false; //await _verification.RequestVerification(user.Username, reason);
         if (!result) return View();
         return RedirectToAction("Index");
     }

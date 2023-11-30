@@ -18,9 +18,16 @@ public class RepliesController : ControllerBase
         _accountRepository = accountRepository;
     }
 
+    [HttpGet("{replyId:int}")]
+    public async Task<ActionResult<ReplyDto>> GetReplyById(int replyId)
+    {
+        var reply = await _thoughtService.GetReplyById(replyId);
+        if (reply is null) return NotFound();
+        return Ok(reply);
+    }
 
-    [HttpGet("{thoughtId:int}")]
-    public async Task<ActionResult<IEnumerable<ReplyDto>>> GetRepliesByThoughtId(int thoughtId)
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<ReplyDto>>> GetRepliesByThoughtId([Required] int thoughtId)
     {
         var replies = await _thoughtService.GetRepliesByThoughtId(thoughtId);
         return Ok(replies);
@@ -31,13 +38,6 @@ public class RepliesController : ControllerBase
     {
         var replies = await _thoughtService.GetRepliesForUser(username);
         return Ok(replies);
-    }
-    
-    [HttpGet("{replyId:int}")]
-    public async Task<ActionResult<ReplyDto>> GetReplyById(int replyId)
-    {
-        var reply = await _thoughtService.GetReplyById(replyId);
-        return Ok(reply);
     }
     
     [HttpPost("{thoughtId:int}")]

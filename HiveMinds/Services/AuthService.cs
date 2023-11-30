@@ -1,63 +1,36 @@
-using HiveMinds.Models;
+using HiveMinds.DTO;
 using HiveMinds.Services.Interfaces;
-using HiveMinds.ViewModels;
+using NuGet.Protocol;
 
 namespace HiveMinds.Services;
 
 public class AuthService : IAuthService
 {
     private readonly ILogger<AuthService> _logger;
-    private readonly ISecurityService _securityService;
-    private readonly IAccountRepository _accountRepository;
-    private readonly IVerificationService _verificationService;
-    private readonly IAccountFactory _accountFactory;
 
-    public AuthService(ILogger<AuthService> logger, IAccountRepository accountRepository,
-        ISecurityService securityService, IVerificationService verificationService, IAccountFactory accountFactory)
+    private readonly HttpClient _httpClient;
+
+    public AuthService(ILogger<AuthService> logger,
+        IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
-        _accountRepository = accountRepository;
-        _securityService = securityService;
-        _verificationService = verificationService;
-        _accountFactory = accountFactory;
+
+        _httpClient = httpClientFactory.CreateClient("HiveMindsAPI");
     }
 
-    public async Task<bool> Signup(SignupViewModel model, bool login = false)
+    public async Task<bool> Signup(SignupDto model, bool login = false)
     {
-        if (await _accountRepository.Exists(model.Username))
-        {
-            return false;
-        }
-
-        var account = await _accountFactory.CreateAccountModel(model);
-
-        var databaseResult = await _accountRepository.CreateUser(account);
-        if (databaseResult)
-        {
-            await _verificationService.SendEmailVerification(account.Username);
-        }
-
-        return databaseResult;
+        var response = await _httpClient.PostAsJsonAsync("Auth/Signup", model);
+        return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> Login(LoginViewModel model)
+    public async Task<LoginResponseDto> Login(LoginDto model)
     {
-        var account = await _accountRepository.GetByUsername(model.Username);
-        if (account == null)
-        {
-            return false;
-        }
-
-        var salt = Convert.FromBase64String(account.PasswordSalt);
-        var hash = Convert.FromBase64String(account.PasswordHash);
-        var passwordVerified = await _securityService.VerifyPassword(model.Password, salt, hash);
-
-        if (passwordVerified)
-        {
-            await ChangeLastLoginTime(account);
-        }
-
-        return passwordVerified;
+        var response = await _httpClient.PostAsJsonAsync("Auth/Login", model);
+        _logger.LogDebug($"{response.ToJson()}");
+        if (!response.IsSuccessStatusCode) return new LoginResponseDto();
+        var loginResponseDto = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
+        return loginResponseDto ?? new LoginResponseDto();
     }
 
     public async Task<bool> Logout()
@@ -73,11 +46,5 @@ public class AuthService : IAuthService
     public async Task<bool> SendPasswordReset(string username)
     {
         return false;
-    }
-
-    private async Task ChangeLastLoginTime(Account account)
-    {
-        account.LastLoginAt = DateTime.UtcNow;
-        await _accountRepository.UpdateUser(account);
     }
 }

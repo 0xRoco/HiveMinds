@@ -1,25 +1,25 @@
-using HiveMinds.Models;
-using HiveMinds.ViewModels;
+using HiveMinds.DTO;
 
 namespace HiveMinds.Services.Interfaces;
 
 public interface IThoughtService
 {
-    Task<List<ThoughtViewModel>> GetThoughts();
-    Task<ThoughtViewModel?> GetThought(int id);
-    Task<List<ThoughtViewModel>?> GetThoughtsByUsername(string username);
-    
+    public Task<IEnumerable<ThoughtDto>> GetThoughts();
+    Task<ThoughtDto?> GetThought(int id);
+    Task<IEnumerable<ThoughtDto>> GetThoughtsForUser(int userId);
+    Task<IEnumerable<ThoughtDto>> GetThoughtsForUser(string username);
     Task<bool> CreateThought(string username, string body);
-    Task<bool> DeleteThought(int thoughtId);
-    
-    Task<List<ThoughtReplyViewModel>?> GetRepliesByThoughtId(int thoughtId);
-    Task<List<ThoughtReplyViewModel>?> GetRepliesByUserId(int userId);
+
+    Task<ReplyDto?> GetReplyById(int replyId);
+    Task<IEnumerable<ReplyDto>> GetRepliesByThoughtId(int thoughtId);
+    Task<IEnumerable<ReplyDto>> GetRepliesForUser(int userId);
+    Task<IEnumerable<ReplyDto>> GetRepliesForUser(string username);
     Task<bool> ReplyToThought(int thoughtId, string username, string body);
-    Task<bool> UpdateReply(int replyId, string body);
-    Task<bool> DeleteReply(int replyId);
-    
-    Task<List<ThoughtLike>?> GetLikesByThoughtId(int thoughtId);
-    Task<List<ThoughtLike>?> GetLikesByUserId(int userId);
+
+
+    Task<IEnumerable<LikeDto>> GetLikesByThoughtId(int thoughtId);
+    Task<IEnumerable<LikeDto>> GetLikesForUser(int userId);
+    Task<IEnumerable<LikeDto>> GetLikesForUser(string username);
     Task<bool> LikeThought(int thoughtId, string username);
     Task<bool> UnlikeThought(int thoughtId, string username);
 }

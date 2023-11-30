@@ -21,12 +21,12 @@ public class AccountRepository : IAccountRepository
         _logger = logger;
     }
 
-    public async Task<List<Account>> GetAll()
+    public async Task<IEnumerable<Account>> GetAll()
     {
         return await _users.AsNoTracking().ToListAsync();
     }
 
-    public async Task<List<Account>> GetByIds(List<int> ids)
+    public async Task<IEnumerable<Account>> GetByIds(List<int> ids)
     {
         if (ids.Count == 0) return new List<Account>();
         return await _users.AsNoTracking().Where(u => ids.Contains(u.Id)).ToListAsync();

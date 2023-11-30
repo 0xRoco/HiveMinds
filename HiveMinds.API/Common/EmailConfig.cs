@@ -1,4 +1,4 @@
-namespace HiveMinds.Common;
+namespace HiveMinds.API.Common;
 
 public class EmailConfig
 {

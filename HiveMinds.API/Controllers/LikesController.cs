@@ -18,9 +18,18 @@ public class LikesController : ControllerBase
         _thoughtService = thoughtService;
         _accountRepository = accountRepository;
     }
-    
-    [HttpGet("{thoughtId:int}")]
-    public async Task<ActionResult<IEnumerable<LikeDto>>> GetLikesByThoughtId(int thoughtId)
+
+
+    [HttpGet("{likeId:int}")]
+    public async Task<ActionResult<LikeDto>> GetLikeById(int likeId)
+    {
+        var like = await _thoughtService.GetLikeById(likeId);
+        if (like is null) return NotFound();
+        return Ok(like);
+    }
+
+    [HttpGet]
+    public async Task<ActionResult<IEnumerable<LikeDto>>> GetLikesByThoughtId([Required] int thoughtId)
     {
         var likes = await _thoughtService.GetLikesByThoughtId(thoughtId);
         return Ok(likes);
@@ -33,13 +42,6 @@ public class LikesController : ControllerBase
         if (account == null) return NotFound();
         var likes = await _thoughtService.GetLikesForUser(account.Id);
         return Ok(likes);
-    }
-    
-    [HttpGet("{likeId:int}")]
-    public async Task<ActionResult<LikeDto>> GetLikeById(int likeId)
-    {
-        var like = await _thoughtService.GetLikeById(likeId);
-        return Ok(like);
     }
     
     [HttpPost("{thoughtId:int}")]

@@ -1,18 +1,18 @@
 using System.Net;
 using System.Net.Mail;
-using HiveMinds.Common;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.API.Common;
+using HiveMinds.API.Services.Interfaces;
 using Microsoft.Extensions.Options;
 
-namespace HiveMinds.Services;
+namespace HiveMinds.API.Services;
 
 public class EmailService : IEmailService
 {
     private readonly EmailConfig _emailConfig;
-    
-    public EmailService(IOptions<HiveMindsSettings> settings)
+
+    public EmailService(IOptions<EmailConfig> settings)
     {
-        _emailConfig = settings.Value.EmailConfig;
+        _emailConfig = settings.Value;
     }
     
     public async Task<bool> SendEmailAsync(string to, string subject, string body)
@@ -26,7 +26,7 @@ public class EmailService : IEmailService
         
         var mailMessage = new MailMessage
         {
-            From = new MailAddress("hiveminds+noreply@mdnite.com"),
+            From = new MailAddress(""),
             Subject = subject,
             Body = body,
             Priority = MailPriority.High,

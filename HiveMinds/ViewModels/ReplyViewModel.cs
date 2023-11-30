@@ -1,6 +1,6 @@
 namespace HiveMinds.ViewModels;
 
-public class ThoughtReplyViewModel
+public class ReplyViewModel
 {
     public int Id { get; set; }
     public int parentId { get; set; }

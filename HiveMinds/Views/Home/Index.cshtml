@@ -35,9 +35,9 @@
                 <div class="list-group-item mb-4 p-4 border rounded shadow-sm">
                     <div class="d-flex justify-content-between align-items-center">
                         <h5 class="mb-0">
-                            <a href="~/profile/@thought.Username" target="_blank" class="text-decoration-none">
-                                @@@thought.Username
-                                @if (await Utility.IsUserVerified(thought.Username))
+                            <a href="~/profile/@thought.Author.Username" target="_blank" class="text-decoration-none">
+                                @@@thought.Author.Username
+                                @if (thought.Author.IsVerified)
                                 {
                                     <i class="bi bi-patch-check-fill text-success me-1"></i>
                                 }

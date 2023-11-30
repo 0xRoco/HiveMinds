@@ -1,4 +1,4 @@
-namespace HiveMinds.Services.Interfaces;
+namespace HiveMinds.API.Services.Interfaces;
 
 public interface IEmailService
 {

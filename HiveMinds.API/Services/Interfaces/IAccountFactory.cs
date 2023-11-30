@@ -1,11 +1,11 @@
+using HiveMinds.DTO;
 using HiveMinds.Models;
-using HiveMinds.ViewModels;
 
-namespace HiveMinds.Services.Interfaces;
+namespace HiveMinds.API.Services.Interfaces;
 
 public interface IAccountFactory
 {
-    Task<Account> CreateAccountModel(SignupViewModel model);
+    Task<Account> CreateAccountModel(SignupDto model);
     Task<Account> CreateAccountModel(string username, string password);
     Task<Account> CreateDemoAccountModel();
 }

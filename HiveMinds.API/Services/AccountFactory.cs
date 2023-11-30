@@ -1,8 +1,8 @@
+using HiveMinds.API.Services.Interfaces;
+using HiveMinds.DTO;
 using HiveMinds.Models;
-using HiveMinds.Services.Interfaces;
-using HiveMinds.ViewModels;
 
-namespace HiveMinds.Services;
+namespace HiveMinds.API.Services;
 
 public class AccountFactory : IAccountFactory
 {
@@ -13,7 +13,7 @@ public class AccountFactory : IAccountFactory
         _securityService = securityService;
     }
 
-    public async Task<Account> CreateAccountModel(SignupViewModel model)
+    public async Task<Account> CreateAccountModel(SignupDto model)
     {
         var salt = _securityService.CreateSalt();
         var hash = Convert.ToBase64String(await _securityService.CreateHash(model.Password, salt));
@@ -42,7 +42,7 @@ public class AccountFactory : IAccountFactory
             LastLoginAt = DateTime.UtcNow,
             LastLoginIp = "",
         };
-        
+
         return accountModel;
     }
 

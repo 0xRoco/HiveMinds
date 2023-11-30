@@ -1,12 +1,13 @@
 using HiveMinds.API.Services.Interfaces;
 using HiveMinds.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiveMinds.API.Controllers;
 
 
 [Route("api/[controller]")]
-[ApiController]
+[ApiController, Authorize]
 public class ThoughtsController : ControllerBase
 {
     private readonly IAccountRepository _accountRepository;

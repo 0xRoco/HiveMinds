@@ -1,13 +1,14 @@
 using AutoMapper;
 using HiveMinds.API.Services.Interfaces;
 using HiveMinds.DTO;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HiveMinds.API.Controllers;
 
 
 [Route("api/[controller]")]
-[ApiController]
+[ApiController, Authorize]
 public class UsersController : ControllerBase
 {
     private readonly IAccountRepository _accountRepository;
@@ -40,8 +41,8 @@ public class UsersController : ControllerBase
 
         return Ok(_mapper.Map<UserDto>(user));
     }
-    
-    [HttpGet("{username}")]
+
+    [HttpGet("{username}"), AllowAnonymous]
     public async Task<ActionResult<UserDto>> GetUser(string username)
     {
         var user = await _accountRepository.GetByUsername(username);
@@ -51,22 +52,5 @@ public class UsersController : ControllerBase
         }
 
         return Ok(_mapper.Map<UserDto>(user));
-    }
-
-    [HttpGet("{username}/profile")]
-    public async Task<ActionResult> GetUserProfile(string username)
-    {
-        var account = await _accountRepository.GetByUsername(username);
-        if (account == null) return NotFound();
-        
-        var user = _mapper.Map<UserDto>(account);
-
-        var profile = new ProfileDto()
-        {
-            User = user,
-            Thoughts = new List<ThoughtDto>(),
-            Likes = new List<LikeDto>()
-        };
-        return Ok(profile);
     }
 }

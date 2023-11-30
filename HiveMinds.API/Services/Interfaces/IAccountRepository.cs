@@ -4,8 +4,8 @@ namespace HiveMinds.API.Services.Interfaces;
 
 public interface IAccountRepository
 {
-    Task<List<Account>> GetAll();
-    Task<List<Account>> GetByIds(List<int> ids);
+    Task<IEnumerable<Account>> GetAll();
+    Task<IEnumerable<Account>> GetByIds(List<int> ids);
     Task<Account?> GetById(int id);
     Task<Account?> GetByEmail(string email);
     Task<Account?> GetByToken(string token);

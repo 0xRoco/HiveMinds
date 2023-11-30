@@ -43,13 +43,6 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark bi bi-box-arrow-right" asp-controller="Auth" asp-action="Logout">Logout</a>
                         </li>
-                        
-                        @if (User.HasClaim(ClaimTypes.Role, "Admin"))
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link text-dark bi bi-speedometer2" asp-controller="Admin" asp-action="Index">Admin Dashboard</a>
-                            </li>
-                        }
                     }
                     @if (User.Identity is {IsAuthenticated: false})
                     {

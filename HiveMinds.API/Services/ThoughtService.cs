@@ -23,7 +23,7 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<ThoughtDto>> GetThoughts()
     {
         var thoughts = await _thoughtRepository.GetThoughts();
-        if (thoughts is null) throw new Exception("No thoughts found");
+        if (thoughts is null) return new List<ThoughtDto>();
         
         var thoughtDtos = new List<ThoughtDto>();
         
@@ -40,7 +40,7 @@ public class ThoughtService : IThoughtService
     public async Task<ThoughtDto?> GetThoughtById(int id)
     {
         var thought = await _thoughtRepository.GetThoughtById(id);
-        if (thought is null) throw new Exception("Thought not found with the given id");
+        if (thought is null) return null;
         
         var replies = await GetRepliesByThoughtId(id);
         var likes = await GetLikesByThoughtId(id);
@@ -60,7 +60,7 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<ThoughtDto>> GetThoughtsByUsername(string username)
     {
         var account = await _accountRepository.GetByUsername(username);
-        if (account is null) throw new Exception("Account not found with the given username");
+        if (account is null) return new List<ThoughtDto>();
 
         var thoughts = await _thoughtRepository.GetThoughtsByUserId(account.Id);
         var thoughtDtos = new List<ThoughtDto>();
@@ -70,6 +70,7 @@ public class ThoughtService : IThoughtService
         foreach (var thought in thoughts)
         {
             var thoughtDto = await GetThoughtById(thought.Id);
+            if (thoughtDto is null) continue;
             thoughtDtos.Add(thoughtDto);
         }
 
@@ -79,7 +80,7 @@ public class ThoughtService : IThoughtService
     public async Task<bool> CreateThought(string username, string body)
     {
         var account = await _accountRepository.GetByUsername(username);
-        if (account is null) throw new Exception("Account not found with the given username");
+        if (account is null) return false;
         
         var thought = new Thought
         {
@@ -99,11 +100,11 @@ public class ThoughtService : IThoughtService
         return await _thoughtRepository.DeleteThought(thoughtId);
     }
 
-    public async Task<ReplyDto> GetReplyById(int replyId)
+    public async Task<ReplyDto?> GetReplyById(int replyId)
     {
         var reply = await _thoughtRepository.GetReplyById(replyId);
-        
-        if (reply is null) throw new Exception("Reply not found with the given id");
+
+        if (reply is null) return null;
         
         var replyDto = _mapper.Map<ReplyDto>(reply);
         
@@ -117,14 +118,12 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<ReplyDto>> GetRepliesByThoughtId(int thoughtId)
     {
         var replies = await _thoughtRepository.GetRepliesByThoughtId(thoughtId);
-        if (replies is null) throw new Exception("No replies found with the given thought id");
-        
         var replyDtos = new List<ReplyDto>();
         
         foreach (var reply in replies)
         {
             var replyDto = await GetReplyById(reply.Id);
-            replyDtos.Add(replyDto);
+            if (replyDto != null) replyDtos.Add(replyDto);
         }
         
         return replyDtos;
@@ -133,16 +132,15 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<ReplyDto>> GetRepliesForUser(string username)
     {
         var account = await _accountRepository.GetByUsername(username);
-        if (account is null) throw new Exception("Account not found with the given username");
+        if (account is null) return new List<ReplyDto>();
         var replies = await _thoughtRepository.GetRepliesForUser(account.Id);
-        if (replies is null) throw new Exception("No replies found for the given user id");
         
         var replyDtos = new List<ReplyDto>();
         
         foreach (var reply in replies)
         {
             var replyDto = await GetReplyById(reply.Id);
-            replyDtos.Add(replyDto);
+            if (replyDto != null) replyDtos.Add(replyDto);
         }
         
         return replyDtos;
@@ -151,7 +149,7 @@ public class ThoughtService : IThoughtService
     public async Task<bool> ReplyToThought(int thoughtId, string username, string body)
     {
         var account = await _accountRepository.GetByUsername(username);
-        if (account is null) throw new Exception("Account not found with the given username");
+        if (account is null) return false;
         
         var reply = new ThoughtReply
         {
@@ -171,10 +169,10 @@ public class ThoughtService : IThoughtService
         return await _thoughtRepository.DeleteReply(replyId);
     }
 
-    public async Task<LikeDto> GetLikeById(int likeId)
+    public async Task<LikeDto?> GetLikeById(int likeId)
     {
         var like = await _thoughtRepository.GetLikeById(likeId);
-        if (like is null) throw new Exception("Like not found with the given id");
+        if (like is null) return null;
         
         var likeDto = _mapper.Map<LikeDto>(like);
         var user = await _accountRepository.GetById(like.UserId);
@@ -187,14 +185,12 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<LikeDto>> GetLikesByThoughtId(int thoughtId)
     {
         var likes = await _thoughtRepository.GetLikesByThoughtId(thoughtId);
-        if (likes is null) throw new Exception("No likes found with the given thought id");
-        
         var likeDtos = new List<LikeDto>();
         
         foreach (var like in likes)
         {
             var likeDto = await GetLikeById(like.Id);
-            likeDtos.Add(likeDto);
+            if (likeDto != null) likeDtos.Add(likeDto);
         }
         
         return likeDtos;
@@ -203,14 +199,13 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<LikeDto>> GetLikesForUser(int userId)
     {
         var likes = await _thoughtRepository.GetLikesForUser(userId);
-        if (likes is null) throw new Exception("No likes found for the given user id");
         
         var likeDtos = new List<LikeDto>();
         
         foreach (var like in likes)
         {
             var likeDto = await GetLikeById(like.Id);
-            likeDtos.Add(likeDto);
+            if (likeDto != null) likeDtos.Add(likeDto);
         }
         
         return likeDtos;
@@ -220,9 +215,8 @@ public class ThoughtService : IThoughtService
     {
         var thought = await _thoughtRepository.GetThoughtById(thoughtId);
         var user = await _accountRepository.GetByUsername(username);
-        if (thought is null) throw new Exception("Thought not found with the given id");
-        if (user is null) throw new Exception("Account not found with the given username");
-        if (await LikeExists(thoughtId, user.Id)) throw new Exception("Like already exists");
+        if (thought is null || user is null) return false;
+        if (await LikeExists(thoughtId, user.Id)) return false;
         
         var like = new ThoughtLike
         {

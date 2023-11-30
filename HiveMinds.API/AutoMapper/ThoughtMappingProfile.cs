@@ -1,7 +1,6 @@
 using AutoMapper;
 using HiveMinds.DTO;
 using HiveMinds.Models;
-using HiveMinds.ViewModels;
 
 namespace HiveMinds.API.AutoMapper;
 

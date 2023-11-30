@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AutoMapper;
 using HiveMinds.Adapters.Interfaces;
 using HiveMinds.Models;
 using HiveMinds.Services.Interfaces;
@@ -13,17 +14,19 @@ namespace HiveMinds.Controllers;
 public class ThoughtController : Controller
 {
     private readonly ILogger<ThoughtController> _logger;
-    private readonly IThoughtService _thoughtService;
-    private readonly IAccountRepository _accountRepo;
     private readonly IModelToViewModelAdapter _modelToView;
+    private readonly IMapper _mapper;
+    private readonly IUserService _userService;
+    private readonly IThoughtService _thoughtService;
 
-    public ThoughtController(ILogger<ThoughtController> logger, IThoughtService thoughtService,
-        IAccountRepository accountRepo, IModelToViewModelAdapter modelToView)
+    public ThoughtController(ILogger<ThoughtController> logger, IModelToViewModelAdapter modelToView,
+        IUserService userService, IThoughtService thoughtService, IMapper mapper)
     {
         _logger = logger;
-        _thoughtService = thoughtService;
-        _accountRepo = accountRepo;
         _modelToView = modelToView;
+        _userService = userService;
+        _thoughtService = thoughtService;
+        _mapper = mapper;
     }
 
     [HttpGet]
@@ -41,14 +44,14 @@ public class ThoughtController : Controller
     {
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
-        var user = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var user = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (user == null) return RedirectToAction("Index", "Home");
 
 
         var vm = new ThoughtPageViewModel()
         {
             CurrentUser = await _modelToView.GetUserViewModel(user),
-            Thought = thought
+            Thought = _mapper.Map<ThoughtViewModel>(thought)
         };
         return View(vm);
     }
@@ -60,7 +63,7 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Post(string content)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var account = await _accountRepo.GetByUsername(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var account = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
         if (account == null) return Challenge();
         await _thoughtService.CreateThought(account.Username, content);
         return Redirect(Request.Headers["Referer"].ToString());
@@ -72,7 +75,7 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Reply(int id, string content)
     {
         if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
-        var user = await _accountRepo.GetByUsername(User.Identity?.Name!);
+        var user = await _userService.GetUser(User.Identity?.Name!);
         if (user == null) return RedirectToPage("/Login");
         await _thoughtService.ReplyToThought(id, user.Username, content);
 
