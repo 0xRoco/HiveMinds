@@ -1,5 +1,5 @@
 using HiveMinds.API.Controllers;
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Interfaces;
 using HiveMinds.DTO;
 using HiveMinds.Models;
 using Microsoft.AspNetCore.Mvc;

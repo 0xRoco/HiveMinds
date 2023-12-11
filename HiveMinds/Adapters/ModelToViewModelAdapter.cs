@@ -1,8 +1,8 @@
 using AutoMapper;
 using HiveMinds.Adapters.Interfaces;
 using HiveMinds.DTO;
+using HiveMinds.Interfaces;
 using HiveMinds.Models;
-using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
 
 namespace HiveMinds.Adapters;

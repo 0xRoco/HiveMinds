@@ -1,6 +1,6 @@
 using AutoMapper;
 using HiveMinds.DTO;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.Interfaces;
 
 namespace HiveMinds.Services;
 

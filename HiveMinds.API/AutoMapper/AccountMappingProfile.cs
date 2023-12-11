@@ -24,10 +24,13 @@ public class AccountMappingProfile : Profile
             .ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePictureUrl))
             .ForMember(dest => dest.LoyaltyStatement, opt => opt.MapFrom(src => src.LoyaltyStatement))
             .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
-            .ForMember(dest => dest.VerificationRequest, opt => opt.MapFrom(src => src.VerificationRequest))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
+            .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role))
             .ForMember(dest => dest.IsEmailVerified, opt => opt.MapFrom(src => src.IsEmailVerified))
             .ForMember(dest => dest.IsPhoneNumberVerified, opt => opt.MapFrom(src => src.IsPhoneNumberVerified))
             .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => src.IsVerified))
-            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
+            .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt))
+            .ForMember(dest => dest.UpdatedAt, opt => opt.MapFrom(src => src.UpdatedAt))
+            .ForMember(dest => dest.DeletedAt, opt => opt.MapFrom(src => src.DeletedAt));
     }
 }

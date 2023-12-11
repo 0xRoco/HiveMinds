@@ -7,7 +7,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\HiveMinds.DataTypes\HiveMinds.DataTypes.csproj" />
+        <ProjectReference Include="..\HiveMinds.Common\HiveMinds.Common.csproj"/>
     </ItemGroup>
 
 </Project>

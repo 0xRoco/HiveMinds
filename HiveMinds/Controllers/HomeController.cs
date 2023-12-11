@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using AutoMapper;
 using HiveMinds.Adapters.Interfaces;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.Interfaces;
 using HiveMinds.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -32,7 +32,10 @@ public class HomeController : Controller
     public async Task<IActionResult> Index()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var account = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+
+        var apiResponse = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        if (apiResponse is { Success: false, Data: null }) return Challenge();
+        var account = apiResponse?.Data;
         if (account == null)
         {
             await HttpContext.SignOutAsync();

@@ -1,5 +1,7 @@
+using System.Net;
 using AutoMapper;
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Interfaces;
+using HiveMinds.Common;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,33 +26,53 @@ public class UsersController : ControllerBase
     }
     
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+    public async Task<ApiResponse<IEnumerable<UserDto>>> GetUsers()
     {
         var users = await _accountRepository.GetAll();
-        return Ok(_mapper.Map<List<UserDto>>(users));
+        var usersDtos = _mapper.Map<IEnumerable<UserDto>>(users);
+        return ApiResponse<IEnumerable<UserDto>>.SuccessResponse("Users found",
+            usersDtos);
     }
     
     [HttpGet("{id:int}")]
-    public async Task<ActionResult<UserDto>> GetUser(int id)
+    public async Task<ApiResponse<UserDto>> GetUser(int id)
     {
         var user = await _accountRepository.GetById(id);
-        if (user == null)
-        {
-            return NotFound();
-        }
-
-        return Ok(_mapper.Map<UserDto>(user));
+        return user == null
+            ? ApiResponse<UserDto>.FailureResponse(HttpStatusCode.NotFound, "User not found")
+            : ApiResponse<UserDto>.SuccessResponse("User found", _mapper.Map<UserDto>(user));
     }
 
     [HttpGet("{username}"), AllowAnonymous]
-    public async Task<ActionResult<UserDto>> GetUser(string username)
+    public async Task<ApiResponse<UserDto>> GetUser(string username)
     {
         var user = await _accountRepository.GetByUsername(username);
-        if (user == null)
-        {
-            return NotFound();
-        }
+        return user == null
+            ? ApiResponse<UserDto>.FailureResponse(HttpStatusCode.NotFound, "User not found")
+            : ApiResponse<UserDto>.SuccessResponse("User found", _mapper.Map<UserDto>(user));
+    }
 
-        return Ok(_mapper.Map<UserDto>(user));
+    [HttpPost("verify-email")]
+    public async Task<ApiResponse<object>> VerifyEmail([FromBody] VerifyEmailDto model)
+    {
+        if (!ModelState.IsValid)
+            return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid request");
+        try
+        {
+            var user = await _accountRepository.GetByUsername(model.Username);
+            if (user == null) return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid username");
+            if (user.IsEmailVerified)
+                return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Email already verified");
+            if (user.EmailCode != model.VerificationCode)
+                return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid verification code");
+            user.IsEmailVerified = true;
+            await _accountRepository.UpdateUser(user);
+            return ApiResponse<object>.SuccessResponse("Email verified");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error verifying email for user: {model}", model);
+            return ApiResponse<object>.FailureResponse(HttpStatusCode.InternalServerError, "Error verifying email");
+        }
     }
 }

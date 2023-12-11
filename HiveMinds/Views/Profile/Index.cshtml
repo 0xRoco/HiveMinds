@@ -1,6 +1,6 @@
-@using HiveMinds.Services.Interfaces
 @using System.Text.RegularExpressions
-@using HiveMinds.DataTypes
+@using HiveMinds.Common;
+@using HiveMinds.Interfaces
 @inject IUtility Utility;
 @model HiveMinds.ViewModels.Pages.ProfilePageViewModel
 @{
@@ -36,24 +36,24 @@
                                     <p class="card-text">@Model.Profile.LastSeen.ToString("MMM d, yyyy - hh:mm:ss tt")</p>
                                 </div>*@
                             </div>
-                            <div class="row">
-                                <div class="col-md-12">
-                                    @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username)
-                                    {
+                            @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username)
+                            {
+                                <div class="row">
+                                    <div class="col-md-12">
                                         <button type="button" class="btn btn-primary btn-sm" onclick="window.open('/profile/edit')">
                                             Edit Profile
                                         </button>
                                         @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username && !Model.Profile.IsVerified && await Utility.GetUserVerificationStatus(Model.Profile.Username) == VerificationStatus.None)
                                         {
                                             <form method="get">
-                                                <button class="btn btn-primary btn-sm" id="request-verification-btn" asp-action="Verify">
+                                                <button class="btn btn-primary btn-sm" id="request-verification-btn" asp-action="Index" asp-controller="Verification">
                                                     Request Verification
                                                 </button>
                                             </form>
                                         }
-                                    }
+                                    </div>
                                 </div>
-                            </div>
+                            }
                         </div>
                     </div>
                     <hr class="mb-4"/>

@@ -1,8 +1,9 @@
 using System.Security.Claims;
 using AutoMapper;
 using HiveMinds.Adapters.Interfaces;
+using HiveMinds.DTO;
+using HiveMinds.Interfaces;
 using HiveMinds.Models;
-using HiveMinds.Services.Interfaces;
 using HiveMinds.ViewModels;
 using HiveMinds.ViewModels.Pages;
 using Microsoft.AspNetCore.Authorization;
@@ -44,7 +45,7 @@ public class ThoughtController : Controller
     {
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
-        var user = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var user = await GetCurrentUser();
         if (user == null) return RedirectToAction("Index", "Home");
 
 
@@ -63,7 +64,7 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Post(string content)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var account = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var account = await GetCurrentUser();
         if (account == null) return Challenge();
         await _thoughtService.CreateThought(account.Username, content);
         return Redirect(Request.Headers["Referer"].ToString());
@@ -75,7 +76,7 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Reply(int id, string content)
     {
         if (User.Identity is { IsAuthenticated: false } or null) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
+        var user = await GetCurrentUser();
         if (user == null) return RedirectToPage("/Login");
         await _thoughtService.ReplyToThought(id, user.Username, content);
 
@@ -124,6 +125,18 @@ public class ThoughtController : Controller
         _logger.LogInformation(Request.Path.ToString());
 
         return Redirect(Request.Headers["Referer"].ToString());
+    }
+
+
+    // TODO: Move this to a service
+    private async Task<UserDto?> GetCurrentUser()
+    {
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        if (username == null) return null;
+        var apiResponse = await _userService.GetUser(username);
+        if (apiResponse is { Success: false, Data: null }) return null;
+        var user = apiResponse?.Data;
+        return user;
     }
     
 }

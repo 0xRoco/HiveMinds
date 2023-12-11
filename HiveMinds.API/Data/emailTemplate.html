@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border: 1px solid #dddddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .email-header {
+            background-color: #0047ab;
+            color: #ffffff;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .email-body {
+            padding: 20px;
+            line-height: 1.5;
+            color: #333333;
+        }
+
+        .email-footer {
+            background-color: #f8f8f8;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .button {
+            background-color: #22b8cf;
+            color: #ffffff;
+            padding: 10px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            display: inline-block;
+            margin: 15px 0;
+        }
+
+        .code {
+            display: inline-block;
+            background-color: #e7f5ff;
+            color: #333333;
+            padding: 5px 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="email-header">
+        <h1>Welcome to HiveMinds</h1>
+    </div>
+    <div class="email-body">
+        <p>Dear {Username},</p>
+        <p>Please follow these steps to verify your email address:</p>
+        <p><a href="{BaseUrl}/profile/verify-email?verificationCode={EmailCode}" class="button">Verify
+            Your Email</a></p>
+        <p>If the button above doesn't work, copy and paste the following URL into your web browser, or enter the
+            verification code provided:</p>
+        <p class="code">{EmailCode}</p>
+        <p>Thank you for your compliance, and welcome to the Party.</p>
+        <p>Sincerely,</p>
+        <p>The "HiveMinds" Team</p>
+    </div>
+    <div class="email-footer">
+        <p>If you did not sign up for a HiveMinds account, please disregard this email.</p>
+        <p>&copy; {Year} - HiveMinds - All rights controlled by the Party.</p>
+    </div>
+</div>
+</body>
+</html>

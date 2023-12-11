@@ -11,6 +11,15 @@
                     <img src="https://i.kym-cdn.com/photos/images/original/000/963/891/4ff.png" alt="HiveMinds Logo" class="logo-img"/>
                 </div>
                 <h3 class="mb-4 text-center">Login</h3>
+                @if (!ViewData.ModelState.IsValid)
+                {
+                    <div class="alert alert-danger" role="alert">
+                        @foreach (var modelError in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            @modelError.ErrorMessage
+                        }
+                    </div>
+                }
                 <form name="form" role="form" method="post">
                     <div class="mb-3">
                         <label for="username" class="form-label">Username</label>

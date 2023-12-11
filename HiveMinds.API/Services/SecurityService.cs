@@ -3,11 +3,11 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using HiveMinds.API.Services.Interfaces;
-using HiveMinds.DTO;
 using HiveMinds.Models;
 using Konscious.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
+using BCrypt.Net;
+using HiveMinds.API.Interfaces;
 
 namespace HiveMinds.API.Services;
 
@@ -23,34 +23,15 @@ public class SecurityService : ISecurityService
         _logger = logger;
     }
 
-    public byte[] CreateSalt(int size = 128)
+    public string CreatePasswordHash(string password, int cost = 9, HashType hashType = HashType.SHA512)
     {
-        var buffer = new byte[size];
-        using var rng = RandomNumberGenerator.Create();
-        rng.GetBytes(buffer);
-        return buffer;
+        var passwordHash = BC.EnhancedHashPassword(password, cost, hashType);
+        return passwordHash;
     }
 
-    public async Task<byte[]> CreateHash(string password, byte[] salt)
+    public bool VerifyPasswordHash(string password, string hash, HashType hashType = HashType.SHA512)
     {
-        byte[] result;
-        using (var argon2 = new Argon2id(Encoding.UTF8.GetBytes(password))){
-
-            argon2.Salt = salt;
-            argon2.DegreeOfParallelism = 4;
-            argon2.Iterations = 4; 
-            argon2.MemorySize = 1024 * 128;
-            result = await argon2.GetBytesAsync(128);
-        }
-        GC.Collect();
-        return result;
-    }
-
-    public async Task<bool> VerifyPassword(string password, byte[] salt, byte[] hash)
-    {
-        var newHash = await CreateHash(password, salt);
-
-        return hash.SequenceEqual(newHash);
+        return BC.EnhancedVerify(password, hash, hashType);
     }
 
     public string GenerateToken(Account user)
@@ -77,11 +58,6 @@ public class SecurityService : ISecurityService
         );
         
         return new JwtSecurityTokenHandler().WriteToken(token);
-    }
-
-    public string GenerateLoginToken()
-    {
-        return "";
     }
 
     public string GenerateCode(int length = 6)

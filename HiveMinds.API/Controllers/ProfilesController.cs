@@ -1,5 +1,7 @@
+using System.Net;
 using AutoMapper;
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Interfaces;
+using HiveMinds.Common;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -47,4 +49,29 @@ public class ProfilesController : ControllerBase
      * TODO: Add endpoint for updating profile
      * email, password, bio, profile picture
      */
+
+    [HttpPut("{username}")]
+    public async Task<ApiResponse<ProfileDto>> UpdateProfile(string username, [FromBody] EditProfileDto dto)
+    {
+        var account = await _accountRepository.GetByUsername(username);
+        if (account is null)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
+                "No account found with that username");
+
+        account.ProfilePictureUrl = dto.ProfilePicture;
+        account.Bio = dto.Bio;
+        account.LoyaltyStatement = dto.LoyaltyStatement;
+
+        var result = await _accountRepository.UpdateUser(account);
+        if (!result)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.InternalServerError,
+                "Failed to update profile");
+
+        account = await _accountRepository.GetByUsername(username);
+
+        return ApiResponse<ProfileDto>.SuccessResponse("Profile updated", new ProfileDto
+        {
+            User = _mapper.Map<UserDto>(account)
+        });
+    }
 }

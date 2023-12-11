@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Verification Request";
+}
+
+<div class="container mt-5">
+    <div class="card p-4 verification-request">
+        <h2 class="card-title verification-title">Request Verification</h2>
+
+        <p class="card-text verification-description">To gain recognition from [REDACTED], provide a compelling reason why you should be acknowledged by the Party.</p>
+
+        <form asp-action="" method="post">
+            <div class="mb-3">
+                <label for="verificationReason" class="form-label">Request Reason</label>
+                <textarea class="form-control" id="verificationReason" minlength="20" maxlength="255" name="reason" required></textarea>
+                <small id="verificationReasonHelp" class="form-text text-muted">Explain in at least 20 characters, but no more than 255 characters.</small>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Submit Request</button>
+        </form>
+    </div>
+</div>

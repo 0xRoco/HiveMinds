@@ -1,4 +1,4 @@
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Interfaces;
 using HiveMinds.Models;
 using Microsoft.AspNetCore.Mvc;
 

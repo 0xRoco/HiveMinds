@@ -1,10 +1,11 @@
 using HiveMinds.Adapters;
 using HiveMinds.Adapters.Interfaces;
-using HiveMinds.Common;
+using HiveMinds.Core;
 using HiveMinds.Extensions;
+using HiveMinds.Interfaces;
 using HiveMinds.Services;
-using HiveMinds.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Sentry;
 using Serilog;
 
 try
@@ -14,21 +15,61 @@ try
     builder.WebHost.UseSentry(o =>
     {
         o.Dsn = builder.Configuration["HiveMindsSettings:SentryDsn"];
-        o.Debug = true;
+        if (builder.Environment.IsDevelopment())
+            o.Debug = true;        
         o.TracesSampleRate = 0.1;
+        o.MinimumEventLevel = LogLevel.Error;
+        o.MinimumBreadcrumbLevel = LogLevel.Information;
+        o.SendDefaultPii = true;
+        o.AttachStacktrace = true;
+        o.IsGlobalModeEnabled = true;
     });
 
     builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
-
-
+    
     builder.Services.AddControllersWithViews();
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
         .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
         {
             options.LoginPath = "/Login";
             options.LogoutPath = "/Logout";
-        });
+            options.Events.OnValidatePrincipal = async context =>
+            {
+                var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
+                var apiResponse = await userService.GetUser(context.Principal?.Identity?.Name ?? string.Empty);
+                var user = apiResponse?.Data;
+                var ipAddress = context.Request.Headers["X-Forwarded-For"].ToString().Split(new[] { ',' })
+                    .FirstOrDefault();
+                if (apiResponse is { Success: false } || user == null || string.IsNullOrEmpty(user.Username))
+                {
+                    await SentrySdk.ConfigureScopeAsync(scope =>
+                    {
+                        scope.User = new User
+                        {
+                            Username = "Anonymous",
+                            IpAddress = ipAddress ?? "Unknown"
+                        };
+                        return Task.CompletedTask;
+                    });
+                }
+                else
+                {
+                    await SentrySdk.ConfigureScopeAsync(scope =>
+                    {
+                        scope.User = new User
+                        {
+                            Id = user.Id.ToString(),
+                            Username = user.Username,
+                            IpAddress = ipAddress ?? "Unknown"
+                        };
 
+                        return Task.CompletedTask;
+                    });
+                }
+            };
+        });
+    
+    
     builder.Services.AddOptions();
     builder.Services.AddAutoMapper(typeof(Program));
 
@@ -58,7 +99,7 @@ try
 
     builder.Services.AddTransient<IModelToViewModelAdapter, ModelToViewModelAdapter>();
     builder.Services.AddLazyResolution();
-
+    
     var app = builder.Build();
 
     Log.Information("Logging started at {Now}", DateTime.UtcNow.ToString("u"));
@@ -79,16 +120,18 @@ try
     app.UseRouting();
 
     app.UseSentryTracing();
-
+    
     app.UseMiddleware<TokenAuthenticationMiddleware>();
 
     app.UseAuthorization();
-
+    
     app.MapControllerRoute(
         name: "default",
         pattern: "{controller=Home}/{action=Index}/{id?}");
-
+    
     app.Run();
+
+
 }
 catch (Exception ex)
 {

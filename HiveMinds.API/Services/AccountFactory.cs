@@ -1,44 +1,48 @@
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Core;
+using HiveMinds.API.Interfaces;
+using HiveMinds.Common;
 using HiveMinds.DTO;
 using HiveMinds.Models;
+using Microsoft.Extensions.Options;
 
 namespace HiveMinds.API.Services;
 
 public class AccountFactory : IAccountFactory
 {
     private readonly ISecurityService _securityService;
+    private readonly HiveMindsConfig _config;
 
-    public AccountFactory(ISecurityService securityService)
+    public AccountFactory(ISecurityService securityService, IOptions<HiveMindsConfig> config)
     {
         _securityService = securityService;
+        _config = config.Value;
     }
 
-    public async Task<Account> CreateAccountModel(SignupDto model)
+    public Account CreateAccountModel(SignupDto model)
     {
-        var salt = _securityService.CreateSalt();
-        var hash = Convert.ToBase64String(await _securityService.CreateHash(model.Password, salt));
+        var hash = _securityService.CreatePasswordHash(model.Password);
         var accountModel = new Account
         {
-            Id = _securityService.GenerateId(min: 100000000, max: 999999999),
+            Id = _securityService.GenerateId(min: 100000000,
+                max: 999999999),
             Username = model.Username,
             Email = model.Email,
             PasswordHash = hash,
-            PasswordSalt = Convert.ToBase64String(salt),
             PhoneNumber = model.PhoneNumber,
             EmailCode = _securityService.GenerateCode(),
             PhoneNumberCode = _securityService.GenerateCode(),
-            LoginToken = "",
             PasswordResetToken = "",
-            ProfilePictureUrl = "",
+            ProfilePictureUrl = _config.DefaultProfileImage,
             LoyaltyStatement = model.PartyLoyaltyStatement,
             Bio = model.Bio,
-            VerificationRequest = "",
             IsEmailVerified = false,
             IsPhoneNumberVerified = false,
             IsVerified = false,
-            IsDeleted = false,
+            Status = AccountStatus.Active,
+            Role = AccountRole.User,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
+            DeletedAt = default,
             LastLoginAt = DateTime.UtcNow,
             LastLoginIp = "",
         };
@@ -46,12 +50,12 @@ public class AccountFactory : IAccountFactory
         return accountModel;
     }
 
-    public async Task<Account> CreateAccountModel(string username, string password)
+    public Account CreateAccountModel(string username, string password)
     {
         throw new NotImplementedException();
     }
 
-    public async Task<Account> CreateDemoAccountModel()
+    public Account CreateDemoAccountModel()
     {
         throw new NotImplementedException();
     }

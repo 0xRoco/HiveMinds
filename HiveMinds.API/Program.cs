@@ -1,6 +1,8 @@
 using System.Text;
+using HiveMinds.API.Core;
+using HiveMinds.API.Interfaces;
+using HiveMinds.API.Repositories;
 using HiveMinds.API.Services;
-using HiveMinds.API.Services.Interfaces;
 using HiveMinds.Database;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -11,12 +13,18 @@ using Serilog;
 try
 {
     var builder = WebApplication.CreateBuilder(args);
-
+    
     builder.WebHost.UseSentry(o =>
     {
         o.Dsn = builder.Configuration["HiveMindsSettings:SentryDsn"];
-        o.Debug = true;
+        if (builder.Environment.IsDevelopment())
+            o.Debug = true;
         o.TracesSampleRate = 0.1;
+        o.MinimumEventLevel = LogLevel.Error;
+        o.MinimumBreadcrumbLevel = LogLevel.Information;
+        o.SendDefaultPii = true;
+        o.AttachStacktrace = true;
+        o.IsGlobalModeEnabled = true;
     });
 
     builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
@@ -72,14 +80,23 @@ try
     builder.Services.AddAutoMapper(typeof(Program));
 
     builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Environment.IsDevelopment()
-        ? builder.Configuration.GetConnectionString("LocalConnection") ?? "NULL"
-        : builder.Configuration.GetConnectionString("DevConnection") ?? "NULL"), ServiceLifetime.Transient);
+        ? builder.Configuration.GetConnectionString("LocalConnection") ??
+          throw new InvalidOperationException("Invalid connection string")
+        : builder.Configuration.GetConnectionString("DevConnection") ??
+          throw new InvalidOperationException("Invalid connection string")), ServiceLifetime.Transient);
 
+    builder.Services.AddOptions();
+
+    builder.Services.Configure<HiveMindsConfig>(builder.Configuration.GetSection("HiveMindsSettings"));
+    builder.Services.Configure<EmailConfig>(builder.Configuration.GetSection("HiveMindsSettings:EmailConfig"));
+    
     builder.Services.AddTransient<ISecurityService, SecurityService>();
     builder.Services.AddTransient<IAccountRepository, AccountRepository>();
     builder.Services.AddTransient<IThoughtRepository, ThoughtRepository>();
     builder.Services.AddTransient<IThoughtService, ThoughtService>();
     builder.Services.AddTransient<IAccountFactory, AccountFactory>();
+    builder.Services.AddTransient<IEmailService, EmailService>();
+    
 
     var app = builder.Build();
 
@@ -88,15 +105,15 @@ try
     Log.Information("Command line arguments: {Args}", $"{string.Join(" ", args)}");
 
 
+    app.UseSerilogRequestLogging();
+
+    app.UseSentryTracing();
+
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
         app.UseSwaggerUI();
     }
-
-    app.UseSerilogRequestLogging();
-
-    app.UseSentryTracing();
 
     app.UseHttpsRedirection();
 

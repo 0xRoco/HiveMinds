@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using HiveMinds.Adapters.Interfaces;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.DTO;
+using HiveMinds.Interfaces;
 using HiveMinds.ViewModels;
 using HiveMinds.ViewModels.Pages;
 using Microsoft.AspNetCore.Authorization;
@@ -37,7 +38,7 @@ public class ProfileController : Controller
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
 
-        var user = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var user = await GetCurrentUser();
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
 
@@ -57,7 +58,7 @@ public class ProfileController : Controller
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
 
-        var user = await _userService.GetUser(User.Identity?.Name!);
+        var user = await GetCurrentUser();
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
         return View(profile);
@@ -70,21 +71,19 @@ public class ProfileController : Controller
     public async Task<IActionResult> Edit(UserViewModel profile)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
+        var user = await GetCurrentUser();
         if (user == null) return NotFound();
         
         user.Bio = profile.Bio;
         user.LoyaltyStatement = profile.PartyLoyaltyStatement;
 
-        var result = false; //await _accountRepo.UpdateUser(user);
-        
-        if (!result)
+        var editResponse = await _userService.UpdateUserProfile(user.Username, new EditProfileDto()
         {
-            return RedirectToAction("Index");
-        }
+            Bio = user.Bio,
+            LoyaltyStatement = user.LoyaltyStatement
+        });
 
         return View(profile);
-
     }
 
     [HttpGet]
@@ -92,11 +91,13 @@ public class ProfileController : Controller
     [AllowAnonymous]
     public async Task<IActionResult> Index(string username)
     {
-        var user = await _userService.GetUser(username);
+        var apiResponse = await _userService.GetUser(username);
+        if (apiResponse is { Success: false, Data: null }) return NotFound();
+        var user = apiResponse?.Data;
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
 
-        var localUser = await _userService.GetUser(User.FindFirstValue(ClaimTypes.Name) ?? string.Empty);
+        var localUser = await GetCurrentUser();
         if (localUser == null) return NotFound();
         var vm = new ProfilePageViewModel()
         {
@@ -113,7 +114,7 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
+        var user = await GetCurrentUser();
         if (user == null) return NotFound();
         
         return View();
@@ -125,42 +126,29 @@ public class ProfileController : Controller
     public async Task<IActionResult> VerifyEmail(string verificationCode)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
+        var user = await GetCurrentUser();
         if (user == null) return NotFound();
 
-        var result = false; //await _verification.VerifyEmail(user.Username, verificationCode);
-        if (!result) return View();
+        var apiResponse = await _userService.VerifyEmail(new VerifyEmailDto()
+        {
+            Username = user.Username,
+            VerificationCode = verificationCode
+        });
+
+        if (apiResponse is { Success: false, Data: null }) return View();
+        
         return RedirectToAction("Index");
     }
 
-    [HttpGet]
-    [Route("/profile/verify")]
-    [Authorize]
-    public async Task<IActionResult> Verify()
+    // TODO: Move this to a service
+    private async Task<UserDto?> GetCurrentUser()
     {
-        if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
-        if (user == null) return NotFound();
-        
-        if (user.IsVerified) return RedirectToAction("Index");
-        
-        return View();
-    }
-    
-    [HttpPost]
-    [Route("/profile/verify")]
-    [Authorize]
-    public async Task<IActionResult> Verify(string reason)
-    {
-        if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var user = await _userService.GetUser(User.Identity?.Name!);
-        if (user == null) return NotFound();
-        
-        if (user.IsVerified) return RedirectToAction("Index");
-
-        var result = false; //await _verification.RequestVerification(user.Username, reason);
-        if (!result) return View();
-        return RedirectToAction("Index");
+        var username = User.FindFirstValue(ClaimTypes.Name);
+        if (username == null) return null;
+        var apiResponse = await _userService.GetUser(username);
+        if (apiResponse is { Success: false, Data: null }) return null;
+        var user = apiResponse?.Data;
+        return user;
     }
     
 }

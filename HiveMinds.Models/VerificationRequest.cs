@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using HiveMinds.DataTypes;
+using HiveMinds.Common;
 
 namespace HiveMinds.Models;
 

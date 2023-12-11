@@ -1,5 +1,6 @@
+using HiveMinds.Common;
 using HiveMinds.DTO;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.Interfaces;
 using NuGet.Protocol;
 
 namespace HiveMinds.Services;
@@ -24,13 +25,13 @@ public class AuthService : IAuthService
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<LoginResponseDto> Login(LoginDto model)
+    public async Task<ApiResponse<LoginResponseDto>> Login(LoginDto model)
     {
         var response = await _httpClient.PostAsJsonAsync("Auth/Login", model);
         _logger.LogDebug($"{response.ToJson()}");
-        if (!response.IsSuccessStatusCode) return new LoginResponseDto();
-        var loginResponseDto = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
-        return loginResponseDto ?? new LoginResponseDto();
+        if (!response.IsSuccessStatusCode) return null;
+        var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<LoginResponseDto>>();
+        return apiResponse;
     }
 
     public async Task<bool> Logout()

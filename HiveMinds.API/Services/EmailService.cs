@@ -1,7 +1,8 @@
 using System.Net;
 using System.Net.Mail;
-using HiveMinds.API.Common;
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Core;
+using HiveMinds.API.Interfaces;
+using HiveMinds.Models;
 using Microsoft.Extensions.Options;
 
 namespace HiveMinds.API.Services;
@@ -26,10 +27,10 @@ public class EmailService : IEmailService
         
         var mailMessage = new MailMessage
         {
-            From = new MailAddress(""),
+            From = new MailAddress("hiveminds@mdnite.com"),
             Subject = subject,
             Body = body,
-            Priority = MailPriority.High,
+            IsBodyHtml = true
         };
         
         mailMessage.To.Add(to);
@@ -37,5 +38,17 @@ public class EmailService : IEmailService
         await client.SendMailAsync(mailMessage);
 
         return true;
+    }
+
+    public async Task<string> PrepareEmailBody(string emailTemplatePath, Account account)
+    {
+        var emailTemplate = await File.ReadAllTextAsync(emailTemplatePath);
+        var emailBody = emailTemplate
+            .Replace("{Username}", account.Username)
+            .Replace("{EmailCode}", account.EmailCode)
+            .Replace("{Year}", DateTime.UtcNow.Year.ToString())
+            .Replace("{BaseUrl}", "https://hiveminds.mdnite-vps.xyz");
+
+        return emailBody;
     }
 }

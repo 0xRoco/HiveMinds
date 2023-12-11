@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 using AutoMapper;
-using HiveMinds.API.Services.Interfaces;
+using HiveMinds.API.Interfaces;
 using HiveMinds.DTO;
 using HiveMinds.Models;
 

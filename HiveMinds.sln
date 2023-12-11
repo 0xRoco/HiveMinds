@@ -8,7 +8,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.Database", "HiveM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.Models", "HiveMinds.Models\HiveMinds.Models.csproj", "{0F1A3521-04BC-4BD3-867F-EF3D10059451}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.DataTypes", "HiveMinds.DataTypes\HiveMinds.DataTypes.csproj", "{3A4EA97B-22A5-48FA-8470-8AD7D833EF0F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.Common", "HiveMinds.Common\HiveMinds.Common.csproj", "{3A4EA97B-22A5-48FA-8470-8AD7D833EF0F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HiveMinds.DTO", "HiveMinds.DTO\HiveMinds.DTO.csproj", "{DD7427C8-7946-43A9-87EB-240D68CF1610}"
 EndProject

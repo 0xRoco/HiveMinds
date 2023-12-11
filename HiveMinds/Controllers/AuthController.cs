@@ -1,6 +1,6 @@
 using System.Security.Claims;
 using HiveMinds.DTO;
-using HiveMinds.Services.Interfaces;
+using HiveMinds.Interfaces;
 using HiveMinds.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -35,7 +35,6 @@ public class AuthController : Controller
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        _logger.LogInformation($"User {User.Identity?.Name} logged out");
         Response.Cookies.Delete("token");
         await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
         return RedirectToAction("Index", "Home");
@@ -58,45 +57,44 @@ public class AuthController : Controller
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogDebug("Login attempt failed");
-                ModelState.AddModelError("Login", "Login attempt failed");
+                ModelState.AddModelError("Login", "Login attempt failed - Invalid state");
                 return View(loginModel);
             }
 
-            var response = await _auth.Login(new LoginDto
+            var loginResponse = await _auth.Login(new LoginDto
             {
                 Username = loginModel.Username,
                 Password = loginModel.Password
             });
 
-            if (string.IsNullOrEmpty(response.Token))
+            if (loginResponse is { Success: false } || loginResponse.Data is null ||
+                string.IsNullOrEmpty(loginResponse.Data.Token))
             {
-                _logger.LogDebug("Login attempt failed for {Username} - Invalid credentials", loginModel.Username);
-                ModelState.AddModelError("Login", "Login attempt failed");
-                return View(new LoginViewModel());
+                ModelState.AddModelError("Login", loginResponse.Message);
+                return View(loginModel);
             }
 
-            Response.Cookies.Append("token", response.Token, new CookieOptions()
+            Response.Cookies.Append("token", loginResponse.Data.Token, new CookieOptions()
             {
-                Expires = response.Expiration,
+                Expires = loginResponse.Data.Expiration,
                 HttpOnly = true,
+                Secure = true
             });
 
-            var user = await _userService.GetUser(loginModel.Username);
+            var userResponse = await _userService.GetUser(loginModel.Username);
+            if (userResponse is { Success: false }) return BadRequest(userResponse.Message);
+            var user = userResponse?.Data;
 
             if (user == null)
             {
-                _logger.LogDebug($"User {loginModel.Username} not found");
-                ModelState.AddModelError("Login", "Login attempt failed");
+                ModelState.AddModelError("Login", "Login attempt failed - User not found");
                 return View(loginModel);
             }
 
             var claims = new List<Claim>
             {
                 new(ClaimTypes.NameIdentifier, user.Id.ToString()),
-                new(ClaimTypes.Name, user.Username),
-                // new(ClaimTypes.Role, user.IsAdmin ? "Admin" : "User"),
-                new("IsVerified", user.IsVerified.ToString()),
+                new(ClaimTypes.Name, user.Username)
             };
 
             var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -106,10 +104,9 @@ public class AuthController : Controller
             await HttpContext.SignInAsync(principal, new AuthenticationProperties
             {
                 IsPersistent = loginModel.RememberMe,
-                ExpiresUtc = response.Expiration,
+                ExpiresUtc = loginResponse.Data.Expiration
             });
 
-            _logger.LogDebug($"User {loginModel.Username} logged in - RememberMe {loginModel.RememberMe}");
             return RedirectToAction("Index", "Home");
         }
         catch (Exception e)
@@ -128,8 +125,7 @@ public class AuthController : Controller
         {
             if (!ModelState.IsValid)
             {
-                _logger.LogDebug("Signup attempt failed");
-                ModelState.AddModelError("Signup", "Signup attempt failed - Invalid model");
+                ModelState.AddModelError("Signup", "Signup attempt failed - Invalid state");
                 return View(signupModel);
             }
 
@@ -145,16 +141,11 @@ public class AuthController : Controller
 
             var result = await _auth.Signup(model);
 
-            if (result == false)
-            {
-                _logger.LogDebug($"Signup attempt for {signupModel.Username} failed");
-                ModelState.AddModelError("Signup", "Signup attempt failed");
-                return View(new SignupViewModel());
-            }
+            if (result) return RedirectToAction("Login", "Auth");
 
-            _logger.LogDebug($"User {signupModel.Username} signed up");
+            ModelState.AddModelError("Signup", "Signup attempt failed - Invalid credentials");
+            return View(new SignupViewModel());
 
-            return View("Login");
         }
         catch (Exception e)
         {
