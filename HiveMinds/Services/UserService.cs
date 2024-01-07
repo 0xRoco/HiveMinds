@@ -29,10 +29,22 @@ public class UserService : IUserService
         return apiResponse;
     }
 
-    public async Task<ApiResponse<UserDto>?> UpdateUserProfile(string username, EditProfileDto model)
+    public async Task<ApiResponse<UserDto>?> UpdateUserProfile(string username, EditProfileDto model,
+        IFormFile? profilePicture)
     {
+        if (profilePicture is not null)
+        {
+            var pfpResponse = await _httpClient.PutAsync($"Profiles/{username}/profile-picture",
+                new MultipartFormDataContent
+                {
+                    { new StreamContent(profilePicture!.OpenReadStream()), "profilePicture", profilePicture.FileName }
+                });
+            if (!pfpResponse.IsSuccessStatusCode) return null;
+        }
+
         var response = await _httpClient.PutAsJsonAsync($"Profiles/{username}", model);
         if (!response.IsSuccessStatusCode) return null;
+
         var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<UserDto>>();
         return apiResponse;
     }

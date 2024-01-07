@@ -1,4 +1,4 @@
-@model HiveMinds.ViewModels.UserViewModel
+@model HiveMinds.ViewModels.EditProfileViewModel
 @{
     ViewData["Title"] = "Edit Profile";
 }
@@ -11,11 +11,13 @@
             <label for="profilePicture">Profile Picture</label>
             <input type="file"  class="form-control" id="profilePicture" name="ProfilePicture" accept=".jpg, .jpeg, .png">
         </div>
-        
+
+        @*
         <div class="form-group">
             <label for="username">Username</label>
-            <input type="text" pattern="[a-zA-Z0-9_]{0,15}" class="form-control" id="username" name="Username" value="@Model.Username" readonly>
+            <input type="text" pattern="[a-zA-Z0-9_]{0,15}" class="form-control" id="username" name="Username" value="" readonly>
         </div>
+        *@
         
         <div class="form-group">
             <label for="bio">Bio</label>

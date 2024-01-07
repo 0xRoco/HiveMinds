@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using Minio;
 using Serilog;
 
 try
@@ -16,10 +17,10 @@ try
     
     builder.WebHost.UseSentry(o =>
     {
-        o.Dsn = builder.Configuration["HiveMindsSettings:SentryDsn"];
+        o.Dsn = builder.Configuration["Sentry:Dsn"];
         if (builder.Environment.IsDevelopment())
             o.Debug = true;
-        o.TracesSampleRate = 0.1;
+        o.TracesSampleRate = 0.05;
         o.MinimumEventLevel = LogLevel.Error;
         o.MinimumBreadcrumbLevel = LogLevel.Information;
         o.SendDefaultPii = true;
@@ -59,6 +60,10 @@ try
         });
     });
 
+    builder.Services.AddMinio(configureClient => configureClient
+        .WithEndpoint(builder.Configuration["Minio:Endpoint"])
+        .WithCredentials(builder.Configuration["Minio:AccessKey"], builder.Configuration["Minio:SecretKey"])
+        .WithSSL());
 
     builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         .AddJwtBearer(options =>
@@ -96,6 +101,7 @@ try
     builder.Services.AddTransient<IThoughtService, ThoughtService>();
     builder.Services.AddTransient<IAccountFactory, AccountFactory>();
     builder.Services.AddTransient<IEmailService, EmailService>();
+    builder.Services.AddTransient<IAuthService, AuthService>();
     
 
     var app = builder.Build();
@@ -114,6 +120,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI();
     }
+    
 
     app.UseHttpsRedirection();
 

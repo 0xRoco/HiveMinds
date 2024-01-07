@@ -47,6 +47,7 @@ public class AccountRepository : IAccountRepository
         return await _users.AsNoTracking().FirstOrDefaultAsync(u => u.Username == username);
     }
 
+    [Obsolete("Use GetByUsername/Id instead to avoid an extra database call", true)]
     public async Task<bool> Exists(string username)
     {
         return await _users.AsNoTracking().AnyAsync(u => u.Username == username);
@@ -67,18 +68,22 @@ public class AccountRepository : IAccountRepository
         return result > 0;
     }
 
-    /// <summary>
-    /// ONLY USE THIS IF YOU KNOW WHAT YOU'RE DOING.
-    /// </summary>
+    /*
+     this method should set the status of the user to deactivated instead of fully deleting it unless deleting is the intended action?
+     fully deleting a user causes headaches because then we need to also delete all the user's posts, comments, etc.
+     */
     public async Task<bool> DeleteUser(Account account)
     {
-        if (!await Exists(account.Username)) return false;
+        var targetAccount = await GetByUsername(account.Username);
+        if (string.IsNullOrEmpty(targetAccount?.Username)) return false;
+
+        _db.Entry(targetAccount).State = EntityState.Deleted;
         _users.Remove(account);
         var result = await _db.SaveChangesAsync();
         return result > 0;
     }
 
-    public async Task<List<VerificationRequest>> GetVerificationRequests()
+    public async Task<IEnumerable<VerificationRequest>> GetVerificationRequests()
     {
         return await _verificationRequests.AsNoTracking().ToListAsync();
     }
@@ -109,12 +114,14 @@ public class AccountRepository : IAccountRepository
 
     public async Task UpdateLastLogin(Account account)
     {
+        _db.Entry(account).State = EntityState.Modified;
         account.LastLoginAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(); 
     }
     
     private async Task ChangeUpdateTime(Account account)
     {
+        _db.Entry(account).State = EntityState.Modified;
         account.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
     }

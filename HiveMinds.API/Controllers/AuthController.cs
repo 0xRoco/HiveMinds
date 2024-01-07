@@ -1,10 +1,9 @@
 using System.Net;
-using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
+using HiveMinds.API.Services;
 using HiveMinds.Common;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Options;
 
 namespace HiveMinds.API.Controllers
 {
@@ -13,24 +12,13 @@ namespace HiveMinds.API.Controllers
     public class AuthController : ControllerBase
     {
         private readonly ILogger<AuthController> _logger;
-        
-        private readonly IAccountRepository _accountRepository;
-        private readonly ISecurityService _securityService;
-        private readonly IAccountFactory _accountFactory;
-        private readonly IEmailService _emailService;
+        private readonly IAuthService _authService;
 
-        private readonly HiveMindsConfig _hiveMindsConfig;
 
-        public AuthController(IAccountRepository accountRepository, ISecurityService securityService,
-            IAccountFactory accountFactory, IEmailService emailService, IOptions<HiveMindsConfig> hiveMindsConfig,
-            ILogger<AuthController> logger)
+        public AuthController(ILogger<AuthController> logger, IAuthService authService)
         {
             _logger = logger;
-            _accountRepository = accountRepository;
-            _securityService = securityService;
-            _accountFactory = accountFactory;
-            _emailService = emailService;
-            _hiveMindsConfig = hiveMindsConfig.Value;
+            _authService = authService;
         }
 
         [HttpPost("login")]
@@ -40,37 +28,15 @@ namespace HiveMinds.API.Controllers
                 return ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.BadRequest, "Invalid request");
             try
             {
-                var account = await _accountRepository.GetByUsername(model.Username);
-                if (account is null)
-                    return ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.BadRequest,
-                        "Account not found with the specified username");
+                var loginResult = await _authService.Login(model);
 
-                var passwordVerified = _securityService.VerifyPasswordHash(model.Password, account.PasswordHash);
-
-                if (!passwordVerified)
-                    return ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.Unauthorized,
-                        "Incorrect Password");
-
-                if (account.Status != AccountStatus.Active)
-                    return ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.Unauthorized,
-                        "Account is deactivated or suspended");
-
-                var token = _securityService.GenerateToken(account);
-
-                var loginResponse = new LoginResponseDto
-                {
-                    UserId = account.Id,
-                    Token = token,
-                    Expiration = DateTime.UtcNow.AddHours(_hiveMindsConfig.TokenExpirationHours)
-                };
-
-                await _accountRepository.UpdateLastLogin(account);
-
-                return ApiResponse<LoginResponseDto>.SuccessResponse("Login successful", loginResponse);
+                return !loginResult.IsSuccess
+                    ? ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.Unauthorized, loginResult.Message)
+                    : ApiResponse<LoginResponseDto>.SuccessResponse("Login successful", loginResult.Value);
             }
             catch (Exception ex)
             {
-                model.Password = "[REDACTED]";
+                model.Password = string.Empty;
                 _logger.LogError(ex, "Error occurred while signing up user: {model}", model);
                 return ApiResponse<LoginResponseDto>.FailureResponse(HttpStatusCode.InternalServerError,
                     "An error occurred while logging in");
@@ -85,25 +51,21 @@ namespace HiveMinds.API.Controllers
 
             try
             {
-                if (await _accountRepository.Exists(model.Username))
-                    return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest,
-                        "An account with the specified username already exists");
+                var signupResult = await _authService.Signup(model);
 
-                var account = _accountFactory.CreateAccountModel(model);
-                var databaseResult = await _accountRepository.CreateUser(account);
-                if (!databaseResult)
-                    return ApiResponse<object>.FailureResponse(HttpStatusCode.InternalServerError,
-                        "An error occurred while signing up");
+                if (!signupResult.IsSuccess)
+                {
+                    return ApiResponse<object>.FailureResponse(
+                        signupResult.Status == AuthService.AuthResults.UsernameAlreadyExists
+                            ? HttpStatusCode.BadRequest
+                            : HttpStatusCode.InternalServerError, signupResult.Message);
+                }
 
-                var emailBody = await _emailService.PrepareEmailBody("Data/emailTemplate.html", account);
-
-                await _emailService.SendEmailAsync(model.Email, "Verify Your HiveMinds Account", emailBody);
-
-                return ApiResponse<object>.SuccessResponse("Account created successfully", account.Id);
+                return ApiResponse<object>.SuccessResponse("Account created successfully", signupResult.Value);
             }
             catch (Exception ex)
             {
-                model.Password = "[REDACTED]";
+                model.Password = string.Empty;
                 _logger.LogError(ex, "Error occurred while signing up user: {model}", model);
                 return ApiResponse<object>.FailureResponse(HttpStatusCode.InternalServerError,
                     "An error occurred while signing up");

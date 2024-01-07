@@ -10,5 +10,5 @@ public class VerificationRequest
     public int UserId { get; set; }
     public string Reason { get; set; } = null!;
     public VerificationStatus Status { get; set; }
-    public DateTime Date { get; set; }
+    public DateTime CreatedAt { get; set; }
 }

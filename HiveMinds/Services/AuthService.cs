@@ -10,12 +10,11 @@ public class AuthService : IAuthService
     private readonly ILogger<AuthService> _logger;
 
     private readonly HttpClient _httpClient;
-
+    
     public AuthService(ILogger<AuthService> logger,
         IHttpClientFactory httpClientFactory)
     {
         _logger = logger;
-
         _httpClient = httpClientFactory.CreateClient("HiveMindsAPI");
     }
 
@@ -25,7 +24,7 @@ public class AuthService : IAuthService
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<ApiResponse<LoginResponseDto>> Login(LoginDto model)
+    public async Task<ApiResponse<LoginResponseDto>?> Login(LoginDto model)
     {
         var response = await _httpClient.PostAsJsonAsync("Auth/Login", model);
         _logger.LogDebug($"{response.ToJson()}");

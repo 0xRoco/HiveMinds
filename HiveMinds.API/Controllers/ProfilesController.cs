@@ -5,6 +5,8 @@ using HiveMinds.Common;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Minio;
+using Minio.DataModel.Args;
 
 namespace HiveMinds.API.Controllers;
 
@@ -15,12 +17,17 @@ public class ProfilesController : ControllerBase
     private readonly IAccountRepository _accountRepository;
     private readonly IThoughtService _thoughtService;
     private readonly IMapper _mapper;
+    private readonly IMinioClientFactory _minioClientFactory;
+    private readonly ILogger<ProfilesController> _logger;
 
-    public ProfilesController(IAccountRepository accountRepository, IThoughtService thoughtService, IMapper mapper)
+    public ProfilesController(IAccountRepository accountRepository, IThoughtService thoughtService, IMapper mapper,
+        IMinioClientFactory minioClientFactory, ILogger<ProfilesController> logger)
     {
         _accountRepository = accountRepository;
         _thoughtService = thoughtService;
         _mapper = mapper;
+        _minioClientFactory = minioClientFactory;
+        _logger = logger;
     }
 
     [HttpGet("{username}"), AllowAnonymous]
@@ -45,11 +52,6 @@ public class ProfilesController : ControllerBase
         return Ok(profile);
     }
 
-    /*
-     * TODO: Add endpoint for updating profile
-     * email, password, bio, profile picture
-     */
-
     [HttpPut("{username}")]
     public async Task<ApiResponse<ProfileDto>> UpdateProfile(string username, [FromBody] EditProfileDto dto)
     {
@@ -58,16 +60,56 @@ public class ProfilesController : ControllerBase
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
                 "No account found with that username");
 
-        account.ProfilePictureUrl = dto.ProfilePicture;
         account.Bio = dto.Bio;
-        account.LoyaltyStatement = dto.LoyaltyStatement;
+        account.LoyaltyStatement = dto.PartyLoyaltyStatement;
 
         var result = await _accountRepository.UpdateUser(account);
         if (!result)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.InternalServerError,
                 "Failed to update profile");
 
-        account = await _accountRepository.GetByUsername(username);
+        return ApiResponse<ProfileDto>.SuccessResponse("Profile updated", new ProfileDto
+        {
+            User = _mapper.Map<UserDto>(account)
+        });
+    }
+
+    //TODO: Move this garbage to a service
+
+    [HttpPut("{username}/profile-picture")]
+    public async Task<ApiResponse<ProfileDto>> UpdateProfilePicture(string username,
+        [FromForm] IFormFile profilePicture)
+    {
+        var account = await _accountRepository.GetByUsername(username);
+        if (account is null)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
+                "No account found with that username");
+
+        if (profilePicture.Length <= 0)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
+                "Invalid profile picture");
+
+        var minioClient = _minioClientFactory.CreateClient();
+
+        var targetBucket = Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development"
+            ? "hiveminds-local"
+            : "hiveminds";
+
+        var imageName =
+            $"{Guid.NewGuid()}.{profilePicture.FileName[(profilePicture.FileName.LastIndexOf('.') + 1)..]}";
+
+        await minioClient.PutObjectAsync(new PutObjectArgs().WithBucket(targetBucket)
+            .WithObject($"profile_images/{account.Id}/{imageName}")
+            .WithContentType(profilePicture.ContentType).WithStreamData(profilePicture.OpenReadStream())
+            .WithObjectSize(profilePicture.Length));
+
+        account.ProfilePictureUrl =
+            $"https://cdn.mdnite-vps.xyz/{targetBucket}/profile_images/{account.Id}/{imageName}";
+
+        var result = await _accountRepository.UpdateUser(account);
+        if (!result)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.InternalServerError,
+                "Failed to update profile");
 
         return ApiResponse<ProfileDto>.SuccessResponse("Profile updated", new ProfileDto
         {

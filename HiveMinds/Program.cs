@@ -14,10 +14,10 @@ try
 
     builder.WebHost.UseSentry(o =>
     {
-        o.Dsn = builder.Configuration["HiveMindsSettings:SentryDsn"];
+        o.Dsn = builder.Configuration["Sentry:Dsn"];
         if (builder.Environment.IsDevelopment())
-            o.Debug = true;        
-        o.TracesSampleRate = 0.1;
+            o.Debug = true;
+        o.TracesSampleRate = 0.05;
         o.MinimumEventLevel = LogLevel.Error;
         o.MinimumBreadcrumbLevel = LogLevel.Information;
         o.SendDefaultPii = true;
@@ -89,6 +89,7 @@ try
             })
         .AddHttpMessageHandler<BearerTokenHandler>();
 
+    builder.Services.AddSignalR();
 
     builder.Services.AddTransient<IAuthService, AuthService>();
     builder.Services.AddTransient<IUserService, UserService>();

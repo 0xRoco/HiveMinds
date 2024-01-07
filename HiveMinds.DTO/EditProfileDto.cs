@@ -2,7 +2,6 @@ namespace HiveMinds.DTO;
 
 public class EditProfileDto
 {
-    public string ProfilePicture { get; set; } = "";
-    public string Bio { get; set; } = "";
-    public string LoyaltyStatement { get; set; } = "";
+    public string Bio { get; init; } = "";
+    public string PartyLoyaltyStatement { get; init; } = "";
 }

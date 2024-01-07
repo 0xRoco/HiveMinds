@@ -14,20 +14,15 @@ public class ProfileController : Controller
 {
     
     private readonly ILogger<ProfileController> _logger;
-    private readonly IAuthService _auth;
     private readonly IModelToViewModelAdapter _modelToView;
     private readonly IUserService _userService;
-    private readonly IThoughtService _thoughtService;
 
-    public ProfileController(IAuthService auth,
-        ILogger<ProfileController> logger, IModelToViewModelAdapter modelToView,
-        IUserService userService, IThoughtService thoughtService)
+    public ProfileController(ILogger<ProfileController> logger, IModelToViewModelAdapter modelToView,
+        IUserService userService)
     {
-        _auth = auth;
         _logger = logger;
         _modelToView = modelToView;
         _userService = userService;
-        _thoughtService = thoughtService;
     }
 
 
@@ -61,29 +56,33 @@ public class ProfileController : Controller
         var user = await GetCurrentUser();
         if (user == null) return NotFound();
         var profile = await _modelToView.GetUserViewModel(user);
-        return View(profile);
+
+        var vm = new EditProfileViewModel
+        {
+            Bio = profile.Bio,
+            PartyLoyaltyStatement = profile.PartyLoyaltyStatement
+        };
+
+        return View(vm);
     }
 
     [HttpPost]
     [Authorize]
     [Route("/profile/edit")]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(UserViewModel profile)
+    public async Task<IActionResult> Edit(EditProfileViewModel profile)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
         var user = await GetCurrentUser();
         if (user == null) return NotFound();
-        
-        user.Bio = profile.Bio;
-        user.LoyaltyStatement = profile.PartyLoyaltyStatement;
 
         var editResponse = await _userService.UpdateUserProfile(user.Username, new EditProfileDto()
         {
-            Bio = user.Bio,
-            LoyaltyStatement = user.LoyaltyStatement
-        });
+            Bio = profile.Bio,
+            PartyLoyaltyStatement = profile.PartyLoyaltyStatement
+        }, profile.ProfilePicture);
 
-        return View(profile);
+        return RedirectToAction("Edit");
     }
 
     [HttpGet]

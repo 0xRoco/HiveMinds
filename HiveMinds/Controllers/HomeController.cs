@@ -16,7 +16,7 @@ public class HomeController : Controller
     private readonly IUserService _userService;
     private readonly IThoughtService _thoughtService;
     private readonly IMapper _mapper;
-
+    
     public HomeController(ILogger<HomeController> logger, IModelToViewModelAdapter modelToView,
         IUserService userService, IThoughtService thoughtService, IMapper mapper)
     {

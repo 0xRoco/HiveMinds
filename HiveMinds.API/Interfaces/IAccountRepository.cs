@@ -12,9 +12,9 @@ public interface IAccountRepository
     Task<bool> Exists(string username);
     Task<bool> CreateUser(Account account);
     Task<bool> UpdateUser(Account account, bool changeUpdateTime = true);
-    Task<bool> DeleteUser(Account account); 
-    
-    Task<List<VerificationRequest>> GetVerificationRequests();
+    Task<bool> DeleteUser(Account account);
+
+    Task<IEnumerable<VerificationRequest>> GetVerificationRequests();
     Task<VerificationRequest?> GetVerificationRequestById(int id);
     Task<VerificationRequest?> GetVerificationRequestsByUserId(int userId);
     Task<bool> CreateVerificationRequest(VerificationRequest request);
