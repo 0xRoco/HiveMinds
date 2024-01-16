@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Mvc;
@@ -45,19 +46,23 @@ public class LikesController : ControllerBase
     }
     
     [HttpPost("{thoughtId:int}")]
-    public async Task<ActionResult> LikeThought(int thoughtId, [Required] string username)
+    public async Task<ActionResult> LikeThought(int thoughtId)
     {
-        var account = await _accountRepository.GetByUsername(username);
+        var accountId = Utility.GetAccountIdFromClaims(User);
+
+        var account = await _accountRepository.GetById(accountId);
         if (account == null) return NotFound();
-        var like = await _thoughtService.LikeThought(thoughtId, username);
+        var like = await _thoughtService.LikeThought(thoughtId, account.Id);
         if (like) return Ok();
         return BadRequest();
     }
     
     [HttpDelete("{thoughtId:int}")]
-    public async Task<ActionResult> DeleteLike(int thoughtId, [Required] string username)
+    public async Task<ActionResult> DeleteLike(int thoughtId)
     {
-        var like = await _thoughtService.UnlikeThought(thoughtId, username);
+        var accountId = Utility.GetAccountIdFromClaims(User);
+
+        var like = await _thoughtService.UnlikeThought(thoughtId, accountId);
         if (like) return Ok();
         return BadRequest();
     }

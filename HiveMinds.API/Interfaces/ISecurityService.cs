@@ -9,5 +9,5 @@ public interface ISecurityService
      bool VerifyPasswordHash(string password, string hash, HashType hashType = HashType.SHA512);
      string GenerateToken(Account user);
      string GenerateCode(int length = 6);
-     int GenerateId(int min = 10000, int max = 99999);
+     int GenerateId(int min = 100000000, int max = 999999999);
 }

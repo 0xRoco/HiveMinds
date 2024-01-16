@@ -1,3 +1,4 @@
+using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Authorization;
@@ -43,13 +44,15 @@ public class ThoughtsController : ControllerBase
         var thoughts = await _thoughtService.GetThoughtsByUsername(username);
         return Ok(thoughts);
     }
-    
-    [HttpPost("{username}")]
-    public async Task<ActionResult> CreateThought(string username, [FromBody] string body)
+
+    [HttpPost]
+    public async Task<ActionResult> CreateThought([FromBody] string body)
     {
-        var account = await _accountRepository.GetByUsername(username);
+        var accountId = Utility.GetAccountIdFromClaims(User);
+
+        var account = await _accountRepository.GetById(accountId);
         if (account == null) return NotFound();
-        var thought = await _thoughtService.CreateThought(username, body);
+        var thought = await _thoughtService.CreateThought(account.Username, body);
         if (thought) return Ok();
         return BadRequest("Could not create thought");
     }

@@ -1,9 +1,15 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace HiveMinds.Models;
 
 public class UserBan
 {
+    [Range(1, int.MaxValue)]
     public int Id { get; set; }
-    public int UserId { get; set; }
+
+    [Range(1, int.MaxValue)] public int AccountId { get; set; }
+
+    [Range(1, int.MaxValue)]
     public int AdminId { get; set; }
     public string Reason { get; set; } = null!;
     public BanStatus Status { get; set; }

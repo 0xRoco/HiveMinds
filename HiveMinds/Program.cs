@@ -23,9 +23,19 @@ try
         o.SendDefaultPii = true;
         o.AttachStacktrace = true;
         o.IsGlobalModeEnabled = true;
+
+        // Filter out health checks so we don't get spammed with transactions
+        o.SetBeforeSendTransaction(transaction => transaction.Name.Contains("GET Ping/") ? null : transaction);
     });
 
-    builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+    builder.Host.UseSerilog((context, configuration) =>
+    {
+        configuration.ReadFrom.Configuration(context.Configuration);
+
+        var noDebugSpam = Environment.GetEnvironmentVariable("NO_DEBUG_SPAM")?.ToLower() == "true";
+
+        if (noDebugSpam) configuration.MinimumLevel.Information();
+    });
     
     builder.Services.AddControllersWithViews();
     builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
@@ -96,6 +106,7 @@ try
     builder.Services.AddTransient<IThoughtService, ThoughtService>();
 
     builder.Services.AddTransient<IUtility, Utility>();
+    builder.Services.AddTransient<INotificationService, NotificationService>();
     builder.Services.AddTransient<BearerTokenHandler>();
 
     builder.Services.AddTransient<IModelToViewModelAdapter, ModelToViewModelAdapter>();
@@ -125,6 +136,8 @@ try
     app.UseMiddleware<TokenAuthenticationMiddleware>();
 
     app.UseAuthorization();
+
+    app.MapHub<NotificationHub>("notificationHub");
     
     app.MapControllerRoute(
         name: "default",

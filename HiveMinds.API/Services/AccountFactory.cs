@@ -23,8 +23,7 @@ public class AccountFactory : IAccountFactory
         var hash = _securityService.CreatePasswordHash(model.Password);
         var accountModel = new Account
         {
-            Id = _securityService.GenerateId(min: 100000000,
-                max: 999999999),
+            Id = _securityService.GenerateId(),
             Username = model.Username,
             Email = model.Email,
             PasswordHash = hash,
@@ -33,7 +32,6 @@ public class AccountFactory : IAccountFactory
             PhoneNumberCode = _securityService.GenerateCode(),
             PasswordResetToken = "",
             ProfilePictureUrl = _config.DefaultProfileImage,
-            LoyaltyStatement = model.PartyLoyaltyStatement,
             Bio = model.Bio,
             IsEmailVerified = false,
             IsPhoneNumberVerified = false,

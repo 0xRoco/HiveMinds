@@ -64,9 +64,8 @@ public class ThoughtController : Controller
     public async Task<IActionResult> Post(string content)
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();
-        var account = await GetCurrentUser();
-        if (account == null) return Challenge();
-        await _thoughtService.CreateThought(account.Username, content);
+
+        await _thoughtService.CreateThought(content);
         return Redirect(Request.Headers["Referer"].ToString());
     }
 
@@ -92,7 +91,8 @@ public class ThoughtController : Controller
 
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
-        if (User.Identity.Name != null) await _thoughtService.LikeThought(id, User.Identity.Name);
+
+        if (User.Identity.Name != null) await _thoughtService.LikeThought(id);
         return Redirect(Request.Headers["Referer"].ToString());
     }
 
@@ -106,7 +106,8 @@ public class ThoughtController : Controller
 
         var thought = await _thoughtService.GetThought(id);
         if (thought == null) return RedirectToAction("Index", "Home");
-        if (User.Identity.Name != null) await _thoughtService.UnlikeThought(id, User.Identity.Name);
+
+        if (User.Identity.Name != null) await _thoughtService.UnlikeThought(id);
         _logger.LogInformation(Request.Path.ToString());
 
         return Redirect(Request.Headers["Referer"].ToString());

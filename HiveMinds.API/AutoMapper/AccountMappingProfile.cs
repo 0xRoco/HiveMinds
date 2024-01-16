@@ -12,7 +12,6 @@ public class AccountMappingProfile : Profile
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
             .ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePictureUrl))
-            .ForMember(dest => dest.LoyaltyStatement, opt => opt.MapFrom(src => src.LoyaltyStatement))
             .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
             .ForMember(dest => dest.IsVerified, opt => opt.MapFrom(src => src.IsVerified))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
@@ -22,7 +21,6 @@ public class AccountMappingProfile : Profile
             .ForMember(dest => dest.Username, opt => opt.MapFrom(src => src.Username))
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.ProfilePictureUrl, opt => opt.MapFrom(src => src.ProfilePictureUrl))
-            .ForMember(dest => dest.LoyaltyStatement, opt => opt.MapFrom(src => src.LoyaltyStatement))
             .ForMember(dest => dest.Bio, opt => opt.MapFrom(src => src.Bio))
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status))
             .ForMember(dest => dest.Role, opt => opt.MapFrom(src => src.Role))

@@ -1,5 +1,6 @@
 using System.Net;
 using AutoMapper;
+using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
 using HiveMinds.Common;
 using HiveMinds.DTO;
@@ -53,15 +54,23 @@ public class ProfilesController : ControllerBase
     }
 
     [HttpPut("{username}")]
-    public async Task<ApiResponse<ProfileDto>> UpdateProfile(string username, [FromBody] EditProfileDto dto)
+    public async Task<ApiResponse<ProfileDto>> UpdateProfile([FromBody] EditProfileDto dto)
     {
-        var account = await _accountRepository.GetByUsername(username);
+        if (!ModelState.IsValid)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest, "Invalid request");
+
+        var accountId = Utility.GetAccountIdFromClaims(User);
+
+        var account = await _accountRepository.GetById(accountId);
         if (account is null)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
                 "No account found with that username");
 
+        if (accountId != account.Id)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
+                "Invalid account id");
+
         account.Bio = dto.Bio;
-        account.LoyaltyStatement = dto.PartyLoyaltyStatement;
 
         var result = await _accountRepository.UpdateUser(account);
         if (!result)
@@ -77,13 +86,17 @@ public class ProfilesController : ControllerBase
     //TODO: Move this garbage to a service
 
     [HttpPut("{username}/profile-picture")]
-    public async Task<ApiResponse<ProfileDto>> UpdateProfilePicture(string username,
-        [FromForm] IFormFile profilePicture)
+    public async Task<ApiResponse<ProfileDto>> UpdateProfilePicture([FromForm] IFormFile profilePicture)
     {
-        var account = await _accountRepository.GetByUsername(username);
+        var accountId = Utility.GetAccountIdFromClaims(User);
+        var account = await _accountRepository.GetById(accountId);
         if (account is null)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
                 "No account found with that username");
+
+        if (accountId != account.Id)
+            return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,
+                "Invalid account id");
 
         if (profilePicture.Length <= 0)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.BadRequest,

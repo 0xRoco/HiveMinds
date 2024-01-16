@@ -2,7 +2,7 @@ namespace HiveMinds.DTO;
 
 public class LoginResponseDto
 {
-    public int UserId { get; set; }
+    public int AccountId { get; set; }
     public string Token { get; set; }
     public DateTime Expiration { get; set; }
 }

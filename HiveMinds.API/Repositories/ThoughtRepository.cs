@@ -29,7 +29,7 @@ public class ThoughtRepository : IThoughtRepository
 
     public async Task<List<Thought>?> GetThoughtsByUserId(int id)
     {
-        return await _db.Thought.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
+        return await _db.Thought.AsNoTracking().Where(x => x.AccountId == id).ToListAsync();
     }
 
     public async Task<bool> CreateThought(Thought thought)
@@ -91,7 +91,7 @@ public class ThoughtRepository : IThoughtRepository
 
     public async Task<List<ThoughtLike>> GetLikesForUser(int id)
     {
-        return await _db.ThoughtLike.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
+        return await _db.ThoughtLike.AsNoTracking().Where(x => x.AccountId == id).ToListAsync();
     }
 
     public async Task<bool> CreateLike(ThoughtLike thoughtLike)
@@ -138,7 +138,7 @@ public class ThoughtRepository : IThoughtRepository
 
     public async Task<List<ThoughtReply>> GetRepliesForUser(int id)
     {
-        return await _db.ThoughtReply.AsNoTracking().Where(x => x.UserId == id).ToListAsync();
+        return await _db.ThoughtReply.AsNoTracking().Where(x => x.AccountId == id).ToListAsync();
     }
 
     public async Task<bool> CreateReply(ThoughtReply thoughtReply)

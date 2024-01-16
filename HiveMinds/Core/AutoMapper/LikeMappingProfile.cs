@@ -11,7 +11,7 @@ public class LikeMappingProfile : Profile
         CreateMap<LikeDto,  ThoughtLike>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
             .ForMember(dest => dest.ThoughtId, opt => opt.MapFrom(src => src.ThoughtId))
-            .ForMember(dest => dest.UserId, opt => opt.MapFrom(src => src.User.Id))
+            .ForMember(dest => dest.AccountId, opt => opt.MapFrom(src => src.User.Id))
             .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => src.CreatedAt));
     }
 }

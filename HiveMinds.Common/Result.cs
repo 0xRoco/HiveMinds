@@ -24,4 +24,10 @@ public class Result<T, TStatus> where TStatus : Enum
     {
         return new Result<T, TStatus>(default!, status, message, false);
     }
+
+    public static Result<T, TStatus> Failure(string message, T value, TStatus status)
+    {
+        return new Result<T, TStatus>(value, status, message, false);
+    }
+    
 }

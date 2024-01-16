@@ -4,7 +4,6 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using HiveMinds.Models;
-using Konscious.Security.Cryptography;
 using Microsoft.IdentityModel.Tokens;
 using BCrypt.Net;
 using HiveMinds.API.Interfaces;
@@ -42,7 +41,7 @@ public class SecurityService : ISecurityService
         
         var claims = new List<Claim>()
         {
-            new(JwtRegisteredClaimNames.Sub, "TokenLogin"),
+            new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString(CultureInfo.InvariantCulture)),
             new(ClaimTypes.NameIdentifier, user.Id.ToString()),

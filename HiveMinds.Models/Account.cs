@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using HiveMinds.Common;
 
@@ -6,6 +7,7 @@ namespace HiveMinds.Models;
 [Table("account")]
 public class Account
 {
+    [Range(1, int.MaxValue)]
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
@@ -17,7 +19,6 @@ public class Account
     public string PhoneNumberCode { get; set; } = string.Empty;
     public string PasswordResetToken { get; set; } = string.Empty;
     public string ProfilePictureUrl { get; set; } = string.Empty;
-    public string LoyaltyStatement { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
     public bool IsEmailVerified { get; set; }
     public bool IsPhoneNumberVerified { get; set; }

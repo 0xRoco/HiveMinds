@@ -56,4 +56,28 @@ public class UserService : IUserService
         var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<object>>();
         return apiResponse;
     }
+
+    public async Task<ApiResponse<VerificationDto>?> GetVerificationRequest(int accountId)
+    {
+        var response = await _httpClient.GetAsync($"Verification?accountId={accountId}");
+        if (!response.IsSuccessStatusCode) return null;
+        var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<VerificationDto>>();
+        return apiResponse;
+    }
+
+    public async Task<ApiResponse<VerificationDto>?> GetVerificationRequest(string username)
+    {
+        var response = await _httpClient.GetAsync($"Verification?username={username}");
+        if (!response.IsSuccessStatusCode) return null;
+        var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<VerificationDto>>();
+        return apiResponse;
+    }
+
+    public async Task<ApiResponse<VerificationDto>?> CreateVerificationRequest(VerificationRequestDto request)
+    {
+        var response = await _httpClient.PostAsJsonAsync("Verification", request);
+        if (!response.IsSuccessStatusCode) return null;
+        var apiResponse = await response.Content.ReadFromJsonAsync<ApiResponse<VerificationDto>>();
+        return apiResponse;
+    }
 }

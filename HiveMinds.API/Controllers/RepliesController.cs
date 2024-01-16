@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
 using HiveMinds.DTO;
 using Microsoft.AspNetCore.Mvc;
@@ -41,11 +42,12 @@ public class RepliesController : ControllerBase
     }
     
     [HttpPost("{thoughtId:int}")]
-    public async Task<ActionResult> ReplyToThought(int thoughtId, [Required] string username, [FromBody] string body)
+    public async Task<ActionResult> ReplyToThought(int thoughtId, [FromBody] string body)
     {
-        var account = await _accountRepository.GetByUsername(username);
+        var accountId = Utility.GetAccountIdFromClaims(User);
+        var account = await _accountRepository.GetById(accountId);
         if (account == null) return NotFound();
-        var reply = await _thoughtService.ReplyToThought(thoughtId, username, body);
+        var reply = await _thoughtService.ReplyToThought(thoughtId, account.Username, body);
         if (reply) return Ok();
         return BadRequest();
     }

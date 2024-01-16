@@ -8,7 +8,7 @@ public interface IThoughtService
     Task<ThoughtDto?> GetThought(int id);
     Task<IEnumerable<ThoughtDto>> GetThoughtsForUser(int userId);
     Task<IEnumerable<ThoughtDto>> GetThoughtsForUser(string username);
-    Task<bool> CreateThought(string username, string body);
+    Task<bool> CreateThought(string body);
 
     Task<ReplyDto?> GetReplyById(int replyId);
     Task<IEnumerable<ReplyDto>> GetRepliesByThoughtId(int thoughtId);
@@ -20,6 +20,6 @@ public interface IThoughtService
     Task<IEnumerable<LikeDto>> GetLikesByThoughtId(int thoughtId);
     Task<IEnumerable<LikeDto>> GetLikesForUser(int userId);
     Task<IEnumerable<LikeDto>> GetLikesForUser(string username);
-    Task<bool> LikeThought(int thoughtId, string username);
-    Task<bool> UnlikeThought(int thoughtId, string username);
+    Task<bool> LikeThought(int thoughtId);
+    Task<bool> UnlikeThought(int thoughtId);
 }

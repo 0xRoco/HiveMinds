@@ -1,3 +1,4 @@
+using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using HiveMinds.API.Core;
 using HiveMinds.API.Interfaces;
@@ -102,6 +103,7 @@ try
     builder.Services.AddTransient<IAccountFactory, AccountFactory>();
     builder.Services.AddTransient<IEmailService, EmailService>();
     builder.Services.AddTransient<IAuthService, AuthService>();
+    builder.Services.AddTransient<IVerificationService, VerificationService>();
     
 
     var app = builder.Build();
@@ -124,6 +126,7 @@ try
 
     app.UseHttpsRedirection();
 
+    JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
     app.UseAuthentication();
     app.UseAuthorization();
 

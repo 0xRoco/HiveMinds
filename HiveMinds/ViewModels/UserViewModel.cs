@@ -6,7 +6,6 @@ public class UserViewModel
 {
     public string ProfilePicture { get; set; } = string.Empty;
     public string Username { get; set; } = string.Empty;
-    public string PartyLoyaltyStatement { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
     public List<ThoughtViewModel>? Thoughts { get; set; } = new();
     

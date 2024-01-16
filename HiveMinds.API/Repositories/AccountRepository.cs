@@ -11,7 +11,7 @@ public class AccountRepository : IAccountRepository
     private readonly DatabaseContext _db;
     private readonly DbSet<Account> _users;
     private readonly DbSet<VerificationRequest> _verificationRequests;
-    private readonly ILogger<AccountRepository> _logger;
+    private readonly ILogger<IAccountRepository> _logger;
     
     public AccountRepository(DatabaseContext db, ILogger<AccountRepository> logger)
     {
@@ -95,7 +95,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<VerificationRequest?> GetVerificationRequestsByUserId(int userId)
     {
-        return await _verificationRequests.AsNoTracking().FirstOrDefaultAsync(v => v.UserId == userId);
+        return await _verificationRequests.AsNoTracking().FirstOrDefaultAsync(v => v.AccountId == userId);
     }
 
     public async Task<bool> CreateVerificationRequest(VerificationRequest request)

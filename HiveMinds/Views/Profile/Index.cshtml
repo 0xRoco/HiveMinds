@@ -10,84 +10,58 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
+            <div class="card mb-4 border-0">
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
                     <h3 class="mb-0">
                         @Model.Profile.Username
                         @if (Model.Profile.IsVerified)
                         {
-                            <span class="badge bg-success">Big Brother's Approval</span>
+                            <span class="badge bg-success ms-auto">Verified</span>
                         }
                     </h3>
+
+                    @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username)
+                    {
+                        <button type="button" class="btn btn-outline-light" onclick="window.open('/profile/edit')">
+                            Edit Profile
+                        </button>
+                    }
                 </div>
                 <div class="card-body">
                     <div class="row mb-4">
                         <div class="col-md-3">
                             <img src="@Model.Profile.ProfilePicture" alt="Profile Picture" class="img-fluid rounded-circle">
                         </div>
-                        <div class="col-md-8">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <h5 class="card-title mb-0">Joined:</h5>
-                                    <p class="card-text">@Model.Profile.Joined.ToString("MMMM d, yyyy")</p>
-                                </div>
-                                @*<div class="col-md-6">
-                                    <h5 class="card-title mb-0">Last Seen:</h5>
-                                    <p class="card-text">@Model.Profile.LastSeen.ToString("MMM d, yyyy - hh:mm:ss tt")</p>
-                                </div>*@
+                        <div class="col-md-9">
+                            <div class="mb-4">
+                                <h5 class="card-title">
+                                    <i class="bi bi-info-circle"></i>
+                                    Bio:
+                                </h5>
+                                <p class="card-text">@Model.Profile.Bio</p>
                             </div>
-                            @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username)
-                            {
-                                <div class="row">
-                                    <div class="col-md-12">
-                                        <button type="button" class="btn btn-primary btn-sm" onclick="window.open('/profile/edit')">
-                                            Edit Profile
-                                        </button>
-                                        @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username && !Model.Profile.IsVerified && await Utility.GetUserVerificationStatus(Model.Profile.Username) == VerificationStatus.None)
-                                        {
-                                            <form method="get">
-                                                <button class="btn btn-primary btn-sm" id="request-verification-btn" asp-action="Index" asp-controller="Verification">
-                                                    Request Verification
-                                                </button>
-                                            </form>
-                                        }
-                                    </div>
-                                </div>
-                            }
+
+                            <div class="mb-4">
+                                <h5 class="card-title">
+                                    <i class="bi bi-calendar"></i>
+                                    Joined:
+                                </h5>
+                                <p class="card-text">@Model.Profile.Joined.ToString("MMMM d, yyyy")</p>
+                            </div>
                         </div>
+
                     </div>
-                    <hr class="mb-4"/>
-                    <div class="mb-4">
-                        <h5 class="card-title">
-                            <i class="bi bi-info-circle"></i>
-                            Bio:
-                        </h5>
-                        <p class="card-text">@Model.Profile.Bio</p>
-                    </div>
-                    <div class="mb-4">
-                        <h5 class="card-title">
-                            <i class="bi bi-chat-left-quote"></i>
-                            Party Loyalty Statement:
-                        </h5>
-                        <p class="card-text">@Model.Profile.PartyLoyaltyStatement</p>
-                    </div>
-                    @*<div class="mb-4">
-                        <h5>
-                            <i class="bi bi-eye"></i>
-                            Party Impressions:
-                        </h5>
-                        <p class="card-text">1235</p>
-                    </div>*@
 
                     @if (User.Identity is {IsAuthenticated: true} && User.Identity.Name == Model.Profile.Username && await Utility.GetUserVerificationStatus(Model.Profile.Username) == VerificationStatus.Pending)
                     {
+                        <hr class="mb-4"/>
                         <span class="text-muted">Verification Request Pending</span>
                     }
                 </div>
             </div>
 
 
-            <ul class="nav nav-tabs">
+            <ul class="nav nav-tabs justify-content-center">
                 <li class="nav-item">
                     <a class="nav-link active" id="thoughts-tab" data-toggle="tab" href="#thoughts" role="tab" aria-controls="thoughts" aria-selected="true">Thoughts</a>
                 </li>

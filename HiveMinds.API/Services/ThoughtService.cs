@@ -33,6 +33,8 @@ public class ThoughtService : IThoughtService
             if (thoughtDto is null) continue;
             thoughtDtos.Add(thoughtDto);
         }
+
+        thoughtDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
         
         return thoughtDtos;
     }
@@ -49,8 +51,8 @@ public class ThoughtService : IThoughtService
 
         thoughtDto.Replies = replies;
         thoughtDto.Likes = likes;
-        
-        var account = await _accountRepository.GetById(thought.UserId);
+
+        var account = await _accountRepository.GetById(thought.AccountId);
         
         thoughtDto.User = _mapper.Map<UserDto>(account);
         
@@ -74,6 +76,8 @@ public class ThoughtService : IThoughtService
             thoughtDtos.Add(thoughtDto);
         }
 
+        thoughtDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
+        
         return thoughtDtos;
     }
 
@@ -86,7 +90,7 @@ public class ThoughtService : IThoughtService
         {
             Id = RandomNumberGenerator.GetInt32(100000000, 999999999),
             ParentThoughtId = -1,
-            UserId = account.Id,
+            AccountId = account.Id,
             Content = body,
             CreatedAt = DateTime.UtcNow,
             Flagged = false,
@@ -107,8 +111,8 @@ public class ThoughtService : IThoughtService
         if (reply is null) return null;
         
         var replyDto = _mapper.Map<ReplyDto>(reply);
-        
-        var user = await _accountRepository.GetById(reply.UserId);
+
+        var user = await _accountRepository.GetById(reply.AccountId);
         
         replyDto.User = _mapper.Map<UserDto>(user);
         
@@ -125,6 +129,8 @@ public class ThoughtService : IThoughtService
             var replyDto = await GetReplyById(reply.Id);
             if (replyDto != null) replyDtos.Add(replyDto);
         }
+
+        replyDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
         
         return replyDtos;
     }
@@ -142,6 +148,8 @@ public class ThoughtService : IThoughtService
             var replyDto = await GetReplyById(reply.Id);
             if (replyDto != null) replyDtos.Add(replyDto);
         }
+
+        replyDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
         
         return replyDtos;
     }
@@ -156,7 +164,7 @@ public class ThoughtService : IThoughtService
             Id = RandomNumberGenerator.GetInt32(100000000,
                 999999999),
             ThoughtId = thoughtId,
-            UserId = account.Id,
+            AccountId = account.Id,
             Content = body,
             CreatedAt = DateTime.UtcNow,
         };
@@ -175,7 +183,7 @@ public class ThoughtService : IThoughtService
         if (like is null) return null;
         
         var likeDto = _mapper.Map<LikeDto>(like);
-        var user = await _accountRepository.GetById(like.UserId);
+        var user = await _accountRepository.GetById(like.AccountId);
         
         likeDto.User = _mapper.Map<UserDto>(user);
         
@@ -185,36 +193,40 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<LikeDto>> GetLikesByThoughtId(int thoughtId)
     {
         var likes = await _thoughtRepository.GetLikesByThoughtId(thoughtId);
-        var likeDtos = new List<LikeDto>();
+        var likesDtos = new List<LikeDto>();
         
         foreach (var like in likes)
         {
             var likeDto = await GetLikeById(like.Id);
-            if (likeDto != null) likeDtos.Add(likeDto);
+            if (likeDto != null) likesDtos.Add(likeDto);
         }
         
-        return likeDtos;
+        likesDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
+        
+        return likesDtos;
     }
 
-    public async Task<IEnumerable<LikeDto>> GetLikesForUser(int userId)
+    public async Task<IEnumerable<LikeDto>> GetLikesForUser(int accountId)
     {
-        var likes = await _thoughtRepository.GetLikesForUser(userId);
+        var likes = await _thoughtRepository.GetLikesForUser(accountId);
         
-        var likeDtos = new List<LikeDto>();
+        var likesDtos = new List<LikeDto>();
         
         foreach (var like in likes)
         {
             var likeDto = await GetLikeById(like.Id);
-            if (likeDto != null) likeDtos.Add(likeDto);
+            if (likeDto != null) likesDtos.Add(likeDto);
         }
         
-        return likeDtos;
+        likesDtos.Sort((x, y) => DateTime.Compare(y.CreatedAt, x.CreatedAt));
+        
+        return likesDtos;
     }
 
-    public async Task<bool> LikeThought(int thoughtId, string username)
+    public async Task<bool> LikeThought(int thoughtId, int accountId)
     {
         var thought = await _thoughtRepository.GetThoughtById(thoughtId);
-        var user = await _accountRepository.GetByUsername(username);
+        var user = await _accountRepository.GetById(accountId);
         if (thought is null || user is null) return false;
         if (await LikeExists(thoughtId, user.Id)) return false;
         
@@ -223,23 +235,23 @@ public class ThoughtService : IThoughtService
             Id = RandomNumberGenerator.GetInt32(100000000, 999999999),
             ThoughtId = thoughtId,
             CreatedAt = DateTime.UtcNow,
-            UserId = user.Id
+            AccountId = user.Id
         };
         
         var result = await _thoughtRepository.CreateLike(like);
         return result;
     }
 
-    public async Task<bool> UnlikeThought(int thoughtId, string username)
+    public async Task<bool> UnlikeThought(int thoughtId, int accountId)
     {
         var thought = await _thoughtRepository.GetThoughtById(thoughtId);
-        var user = await _accountRepository.GetByUsername(username);
+        var user = await _accountRepository.GetById(accountId);
         if (thought == null || user == null) return false;
         if (!await LikeExists(thoughtId, user.Id)) return false;
         
         var likes = await _thoughtRepository.GetLikesByThoughtId(thoughtId);
-        
-        var like = likes.FirstOrDefault(x=> x.UserId == user.Id);
+
+        var like = likes.FirstOrDefault(x => x.AccountId == user.Id);
         if (like == null) return false;
         
         var result = await _thoughtRepository.DeleteLike(like.Id);
@@ -250,6 +262,6 @@ public class ThoughtService : IThoughtService
     private async Task<bool> LikeExists(int thoughtId, int userId)
     {
         var likes = await _thoughtRepository.GetLikesByThoughtId(thoughtId);
-        return likes.Any(like => like.UserId == userId);
+        return likes.Any(like => like.AccountId == userId);
     }
 }

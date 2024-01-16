@@ -1,15 +1,18 @@
-using AutoMapper;
 using HiveMinds.DTO;
 using HiveMinds.Interfaces;
+using Newtonsoft.Json;
+using NuGet.Protocol;
 
 namespace HiveMinds.Services;
 
 public class ThoughtService : IThoughtService
 {
     private readonly HttpClient _httpClient;
+    private readonly ILogger<IThoughtService> _logger;
 
-    public ThoughtService(IHttpClientFactory httpClientFactory)
+    public ThoughtService(IHttpClientFactory httpClientFactory, ILogger<IThoughtService> logger)
     {
+        _logger = logger;
         _httpClient = httpClientFactory.CreateClient("HiveMindsAPI");
     }
 
@@ -38,13 +41,14 @@ public class ThoughtService : IThoughtService
     public async Task<IEnumerable<ThoughtDto>> GetThoughtsForUser(string username)
     {
         var response = await _httpClient.GetAsync($"Thoughts/{username}");
+        _logger.LogWarning("Response: {response}", response.Content.ToJson(Formatting.Indented));
         var thoughtDtos = await response.Content.ReadFromJsonAsync<IEnumerable<ThoughtDto>>();
         return thoughtDtos ?? Enumerable.Empty<ThoughtDto>();
     }
 
-    public async Task<bool> CreateThought(string username, string body)
+    public async Task<bool> CreateThought(string body)
     {
-        var response = await _httpClient.PostAsJsonAsync($"Thoughts/{username}", body);
+        var response = await _httpClient.PostAsJsonAsync("Thoughts", body);
         return response.IsSuccessStatusCode;
     }
 
@@ -104,15 +108,15 @@ public class ThoughtService : IThoughtService
         return likeDtos ?? Enumerable.Empty<LikeDto>();
     }
 
-    public async Task<bool> LikeThought(int thoughtId, string username)
+    public async Task<bool> LikeThought(int thoughtId)
     {
-        var response = await _httpClient.PostAsJsonAsync($"Likes/{thoughtId}?username={username}", "");
+        var response = await _httpClient.PostAsJsonAsync($"Likes/{thoughtId}", "");
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> UnlikeThought(int thoughtId, string username)
+    public async Task<bool> UnlikeThought(int thoughtId)
     {
-        var response = await _httpClient.DeleteAsync($"Likes/{thoughtId}?username={username}");
+        var response = await _httpClient.DeleteAsync($"Likes/{thoughtId}");
         return response.IsSuccessStatusCode;
     }
 }

@@ -1,21 +1,56 @@
+@using HiveMinds.Common
+@model HiveMinds.ViewModels.VerificationViewModel
 @{
     ViewData["Title"] = "Verification Request";
 }
 
 <div class="container mt-5">
     <div class="card p-4 verification-request">
-        <h2 class="card-title verification-title">Request Verification</h2>
+        <div class="card-body">
+            @if (!Model.User.IsVerified && Model.VerificationRequest == null)
+            {
+                <h2 class="card-title verification-title">Send a Verification Request</h2>
+                <p class="card-text verification-description">To gain recognition from [REDACTED], provide a compelling reason why you should be acknowledged by the Party.</p>
+                <form asp-action="" method="post">
 
-        <p class="card-text verification-description">To gain recognition from [REDACTED], provide a compelling reason why you should be acknowledged by the Party.</p>
+                    <div class="mb-3">
+                        <label for="verificationReason" class="form-label">Request Reason</label>
+                        <textarea class="form-control" id="verificationReason" minlength="20" maxlength="255" name="reason" required></textarea>
+                        <small id="verificationReasonHelp" class="form-text text-muted">Explain in at least 20 characters, but no more than 255 characters.</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit Request</button>
 
-        <form asp-action="" method="post">
-            <div class="mb-3">
-                <label for="verificationReason" class="form-label">Request Reason</label>
-                <textarea class="form-control" id="verificationReason" minlength="20" maxlength="255" name="reason" required></textarea>
-                <small id="verificationReasonHelp" class="form-text text-muted">Explain in at least 20 characters, but no more than 255 characters.</small>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Submit Request</button>
-        </form>
+                </form>
+            }
+            else
+            {
+                <div class="mb-3">
+                    <h2 class="card-title verification-title">You Already Submitted a Verification Request</h2>
+                    <hr>
+                    <p class="mb-0">
+                        <strong>Current Status: </strong>
+                        <span class="@(Model.VerificationRequest?.Status switch
+                                     {
+                                         VerificationStatus.Approved => "text-success",
+                                         VerificationStatus.Pending => "text-warning",
+                                         _ => "text-danger"
+                                         })">
+                            <i class="bi @(Model.VerificationRequest?.Status switch
+                                         {
+                                             VerificationStatus.Approved => "bi-check-circle-fill",
+                                             VerificationStatus.Pending => "bi-clock-fill",
+                                             _ => "bi-x-circle-fill"
+                                             })">
+                            </i>
+                            @Model.VerificationRequest?.Status
+                        </span>
+                    </p>
+                    <p class="mb-3">
+                    <strong>Reason: </strong>
+                    @Model.VerificationRequest?.Reason
+                    <p class="mb-0">Your request is currently being reviewed by the Party. You will be notified of the result via email.</p>
+                </div>
+            }
+        </div>
     </div>
 </div>

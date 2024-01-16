@@ -19,7 +19,7 @@ public interface IThoughtService
 
     public Task<LikeDto?> GetLikeById(int likeId);
     public Task<IEnumerable<LikeDto>> GetLikesByThoughtId(int thoughtId);
-    public Task<IEnumerable<LikeDto>> GetLikesForUser(int userId);
-    public Task<bool> LikeThought(int thoughtId, string username);
-    public Task<bool> UnlikeThought(int thoughtId, string username);
+    public Task<IEnumerable<LikeDto>> GetLikesForUser(int accountId);
+    public Task<bool> LikeThought(int thoughtId, int accountId);
+    public Task<bool> UnlikeThought(int thoughtId, int accountId);
 }

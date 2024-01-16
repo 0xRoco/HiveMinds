@@ -11,7 +11,6 @@ public class AccountDto
     public AccountStatus Status { get; set; }
     public AccountRole Role { get; set; }
     public string ProfilePictureUrl { get; set; } = string.Empty;
-    public string LoyaltyStatement { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
     public bool IsEmailVerified { get; set; }
     public bool IsPhoneNumberVerified { get; set; }

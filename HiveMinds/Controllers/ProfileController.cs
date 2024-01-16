@@ -60,7 +60,6 @@ public class ProfileController : Controller
         var vm = new EditProfileViewModel
         {
             Bio = profile.Bio,
-            PartyLoyaltyStatement = profile.PartyLoyaltyStatement
         };
 
         return View(vm);
@@ -79,7 +78,6 @@ public class ProfileController : Controller
         var editResponse = await _userService.UpdateUserProfile(user.Username, new EditProfileDto()
         {
             Bio = profile.Bio,
-            PartyLoyaltyStatement = profile.PartyLoyaltyStatement
         }, profile.ProfilePicture);
 
         return RedirectToAction("Edit");

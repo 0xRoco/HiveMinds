@@ -17,8 +17,6 @@ public class SignupViewModel
     [Compare("Password", ErrorMessage = "Passwords do not match")]
     public string ConfirmPassword { get; set; }
     [Required]
-    public string PartyLoyaltyStatement { get; set; }
-    [Required]
     public string Bio { get; set; }
     public string PhoneNumber { get; set; }
 }

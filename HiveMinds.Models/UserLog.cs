@@ -1,9 +1,13 @@
+using System.ComponentModel.DataAnnotations;
+
 namespace HiveMinds.Models;
 
 public class UserLog
 {
-    public int Id { get; set; } 
-    public int UserId { get; set; }
+    [Range(1, int.MaxValue)]
+    public int Id { get; set; }
+
+    [Range(1, int.MaxValue)] public int AccountId { get; set; }
     public string Username { get; set; } = null!;
     public UserAction Action { get; set; } 
     public DateTime Date { get; set; }

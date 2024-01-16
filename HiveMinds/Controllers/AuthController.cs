@@ -133,7 +133,6 @@ public class AuthController : Controller
             {
                 Username = signupModel.Username,
                 Password = signupModel.Password,
-                PartyLoyaltyStatement = signupModel.PartyLoyaltyStatement,
                 Bio = signupModel.Bio,
                 Email = signupModel.Email,
                 PhoneNumber = signupModel.PhoneNumber,

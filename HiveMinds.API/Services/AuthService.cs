@@ -59,7 +59,7 @@ public class AuthService : IAuthService
 
         var loginResponse = new LoginResponseDto
         {
-            UserId = account.Id,
+            AccountId = account.Id,
             Token = _securityService.GenerateToken(account),
             Expiration = DateTime.UtcNow.AddHours(_hiveMindsConfig.TokenExpirationHours)
         };
