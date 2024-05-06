@@ -70,13 +70,41 @@ public class UsersController : ControllerBase
             if (user.EmailCode != verificationCode)
                 return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid verification code");
             user.IsEmailVerified = true;
-            await _accountRepository.UpdateUser(user);
+            await _accountRepository.UpdateAccount(user);
             return ApiResponse<object>.SuccessResponse("Email verified");
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error verifying email for user: {id}", accountId);
             return ApiResponse<object>.FailureResponse(HttpStatusCode.InternalServerError, "Error verifying email");
+        }
+    }
+
+    [HttpDelete]
+    public async Task<ApiResponse<object>> DeleteUser()
+    {
+        var accountId = Utility.GetAccountIdFromClaims(User);
+
+        if (!ModelState.IsValid)
+            return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid request");
+
+        try
+        {
+            var user = await _accountRepository.GetById(accountId);
+
+            if (user == null)
+                return ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Invalid username");
+
+            var deleted = await _accountRepository.DeleteAccount(user);
+
+            return deleted
+                ? ApiResponse<object>.SuccessResponse("User deleted")
+                : ApiResponse<object>.FailureResponse(HttpStatusCode.BadRequest, "Error deleting user");
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting user: {id}", accountId);
+            return ApiResponse<object>.FailureResponse(HttpStatusCode.InternalServerError, "Error deleting user");
         }
     }
 }

@@ -1,0 +1,71 @@
+{
+  "AllowedHosts": "*",
+  "HiveMindsSettings": {
+    "MaxThoughtLength": 250,
+    "MaxImageSize": 0,
+    "TokenExpirationHours": 1,
+    "DefaultProfileImage": "DEFAULT_PROFILE_IMAGE_URL",
+    "BaseUrl": "BASE_URL",
+    "EmailConfig": {
+      "SmtpServer": "SMTP_SERVER",
+      "SmtpPort": 587,
+      "EnableSsl": true,
+      "Username": "EMAIL_USERNAME",
+      "Password": "EMAIL_PASSWORD"
+    }
+  },
+  "Serilog": {
+    "Using": [
+      "Serilog",
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.Seq",
+      "Sentry.Serilog"
+    ],
+    "MinimumLevel": "Information",
+    "Enrich": [
+      "FromLogContext",
+      "WithProperty"
+    ],
+    "Properties": {
+      "Application": "HiveMinds.API"
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:u}| {Level:u}| {Message:lj}{NewLine}{Exception}",
+          "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Literate, Serilog.Sinks.Console"
+        }
+      },
+      {
+        "Name": "Seq",
+        "Args": {
+          "serverUrl": "SEQ_SERVER_URL",
+          "apiKey": "SEQ_API_KEY"
+        }
+      },
+      {
+        "Name": "Sentry",
+        "Args": {
+          "InitializeSdk": false
+        }
+      }
+    ]
+  },
+  "ConnectionStrings": {
+    "DefaultConnection": "DATABASE_CONNECTION_STRING"
+  },
+  "Jwt": {
+    "SecretKey": "JWT_SECRET_KEY",
+    "Issuer": "HiveMinds",
+    "Audience": "HiveMinds.API"
+  },
+  "Sentry": {
+    "Dsn": "SENTRY_DSN"
+  },
+  "Minio": {
+    "Endpoint": "MINIO_ENDPOINT",
+    "SecretKey": "MINIO_SECRET_KEY",
+    "AccessKey": "MINIO_ACCESS_KEY"
+  }
+}

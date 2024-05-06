@@ -52,15 +52,15 @@ namespace HiveMinds.API.Controllers.admin
         [HttpGet("[action]")]
         public async Task<ActionResult<bool>> Exists(string username)
         {
-            var exists = await _accountRepository.Exists(username);
-            if (exists) return Ok();
+            var account = await _accountRepository.GetByUsername(username);
+            if (account is { Id: >= 1 }) return Ok();
             return NotFound();
         }
         
         [HttpPost]
         public async Task<ActionResult<bool>> CreateUser(Account account)
         {
-            var created = await _accountRepository.CreateUser(account);
+            var created = await _accountRepository.CreateAccount(account);
             if (created) return Ok();
             return BadRequest();
         }
@@ -68,7 +68,7 @@ namespace HiveMinds.API.Controllers.admin
         [HttpPut]
         public async Task<ActionResult<bool>> UpdateUser(Account account)
         {
-            var updated = await _accountRepository.UpdateUser(account);
+            var updated = await _accountRepository.UpdateAccount(account);
             if (updated) return Ok();
             return BadRequest();
         }
@@ -77,7 +77,7 @@ namespace HiveMinds.API.Controllers.admin
         [HttpDelete]
         public async Task<ActionResult<bool>> DeleteUser(Account account)
         {
-            var deleted = await _accountRepository.DeleteUser(account);
+            var deleted = await _accountRepository.DeleteAccount(account);
             if (deleted) return Ok();
             return BadRequest();
         }

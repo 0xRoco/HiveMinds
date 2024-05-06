@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using AutoMapper;
 using HiveMinds.API.Interfaces;
+using HiveMinds.Common;
 using HiveMinds.DTO;
 using HiveMinds.Models;
 
@@ -43,6 +44,9 @@ public class ThoughtService : IThoughtService
     {
         var thought = await _thoughtRepository.GetThoughtById(id);
         if (thought is null) return null;
+        var account = await _accountRepository.GetById(thought.AccountId);
+
+        if (account is not { Status: AccountStatus.Active }) return null;
         
         var replies = await GetRepliesByThoughtId(id);
         var likes = await GetLikesByThoughtId(id);
@@ -51,8 +55,6 @@ public class ThoughtService : IThoughtService
 
         thoughtDto.Replies = replies;
         thoughtDto.Likes = likes;
-
-        var account = await _accountRepository.GetById(thought.AccountId);
         
         thoughtDto.User = _mapper.Map<UserDto>(account);
         
@@ -63,6 +65,8 @@ public class ThoughtService : IThoughtService
     {
         var account = await _accountRepository.GetByUsername(username);
         if (account is null) return new List<ThoughtDto>();
+
+        if (account.Status != AccountStatus.Active) return new List<ThoughtDto>();
 
         var thoughts = await _thoughtRepository.GetThoughtsByUserId(account.Id);
         var thoughtDtos = new List<ThoughtDto>();
@@ -109,10 +113,12 @@ public class ThoughtService : IThoughtService
         var reply = await _thoughtRepository.GetReplyById(replyId);
 
         if (reply is null) return null;
-        
-        var replyDto = _mapper.Map<ReplyDto>(reply);
 
         var user = await _accountRepository.GetById(reply.AccountId);
+
+        if (user is not { Status: AccountStatus.Active }) return null;
+        
+        var replyDto = _mapper.Map<ReplyDto>(reply);
         
         replyDto.User = _mapper.Map<UserDto>(user);
         
@@ -139,6 +145,9 @@ public class ThoughtService : IThoughtService
     {
         var account = await _accountRepository.GetByUsername(username);
         if (account is null) return new List<ReplyDto>();
+
+        if (account.Status != AccountStatus.Active) return new List<ReplyDto>();
+        
         var replies = await _thoughtRepository.GetRepliesForUser(account.Id);
         
         var replyDtos = new List<ReplyDto>();

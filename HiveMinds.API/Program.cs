@@ -19,14 +19,16 @@ try
     builder.WebHost.UseSentry(o =>
     {
         o.Dsn = builder.Configuration["Sentry:Dsn"];
+        o.IsGlobalModeEnabled = true;
+        
         if (builder.Environment.IsDevelopment())
             o.Debug = true;
+        
         o.TracesSampleRate = 0.05;
         o.MinimumEventLevel = LogLevel.Error;
         o.MinimumBreadcrumbLevel = LogLevel.Information;
         o.SendDefaultPii = true;
         o.AttachStacktrace = true;
-        o.IsGlobalModeEnabled = true;
     });
 
     builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
@@ -85,11 +87,13 @@ try
 
     builder.Services.AddAutoMapper(typeof(Program));
 
-    builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySQL(builder.Environment.IsDevelopment()
-        ? builder.Configuration.GetConnectionString("LocalConnection") ??
-          throw new InvalidOperationException("Invalid connection string")
-        : builder.Configuration.GetConnectionString("DevConnection") ??
-          throw new InvalidOperationException("Invalid connection string")), ServiceLifetime.Transient);
+    builder.Services.AddDbContext<DatabaseContext>(
+        options =>
+        {
+            options.UseMySQL(builder.Configuration.GetConnectionString("DefaultConnection") ??
+                             throw new InvalidOperationException("Invalid database connection string"));
+            options.EnableSensitiveDataLogging();
+        });
 
     builder.Services.AddOptions();
 

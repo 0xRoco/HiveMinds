@@ -1,0 +1,50 @@
+{
+  "AllowedHosts": "*",
+  "Serilog": {
+    "Using": [
+      "Serilog",
+      "Serilog.Sinks.Console",
+      "Serilog.Sinks.Seq",
+      "Sentry.Serilog"
+    ],
+    "MinimumLevel": "Information",
+    "Enrich": [
+      "FromLogContext",
+      "WithProperty"
+    ],
+    "Properties": {
+      "Application": "HiveMinds"
+    },
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:u}| {Level:u}| {Message:lj}{NewLine}{Exception}",
+          "theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Literate, Serilog.Sinks.Console"
+        }
+      },
+      {
+        "Name": "Seq",
+        "Args": {
+          "serverUrl": "SEQ_SERVER_URL",
+          "apiKey": "SEQ_API_KEY"
+        }
+      },
+      {
+        "Name": "Sentry",
+        "Args": {
+          "InitializeSdk": false
+        }
+      }
+    ]
+  },
+  "Sentry": {
+    "Dsn": "SENTRY_DSN"
+  },
+  "HiveMindsSettings": {
+    "ApiUrl": {
+      "local": "LOCAL_API_URL",
+      "dev": "DEV_API_URL"
+    }
+  }
+}

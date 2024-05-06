@@ -9,7 +9,6 @@ namespace HiveMinds.Adapters;
 
 public class ModelToViewModelAdapter : IModelToViewModelAdapter
 {
-    private const string DefaultUsername = "%MISSING_USERNAME%";
     private readonly IMapper _mapper;
 
     private readonly IUserService _userService;
@@ -36,14 +35,13 @@ public class ModelToViewModelAdapter : IModelToViewModelAdapter
 
     public async Task<ThoughtViewModel> GetThoughtViewModel(ThoughtDto thought)
     {
-        var thoughtAuthor = thought.User;
         var replies = await _thoughtService.GetRepliesByThoughtId(thought.Id);
         var likes = await _thoughtService.GetLikesByThoughtId(thought.Id);
         
         var vm = _mapper.Map<ThoughtViewModel>(thought);
         vm.Replies = _mapper.Map<List<ReplyViewModel>>(replies);
         vm.Likes = _mapper.Map<List<ThoughtLike>>(likes);
-        vm.Author = thoughtAuthor;
+        _mapper.Map(thought.User, vm.Author);
         
         return vm;    
     }
@@ -52,7 +50,7 @@ public class ModelToViewModelAdapter : IModelToViewModelAdapter
     {
         var replyAccount = reply.User;
         var vm = _mapper.Map<ReplyViewModel>(reply);
-        vm.Username = replyAccount.Username ?? DefaultUsername;
+        vm.Username = _mapper.Map<string>(replyAccount.Username);
         
         return vm;
     }

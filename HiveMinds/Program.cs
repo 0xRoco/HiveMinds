@@ -43,6 +43,7 @@ try
         {
             options.LoginPath = "/Login";
             options.LogoutPath = "/Logout";
+            
             options.Events.OnValidatePrincipal = async context =>
             {
                 var userService = context.HttpContext.RequestServices.GetRequiredService<IUserService>();
@@ -50,32 +51,17 @@ try
                 var user = apiResponse?.Data;
                 var ipAddress = context.Request.Headers["X-Forwarded-For"].ToString().Split(new[] { ',' })
                     .FirstOrDefault();
-                if (apiResponse is { Success: false } || user == null || string.IsNullOrEmpty(user.Username))
+                await SentrySdk.ConfigureScopeAsync(scope =>
                 {
-                    await SentrySdk.ConfigureScopeAsync(scope =>
+                    scope.User = new User
                     {
-                        scope.User = new User
-                        {
-                            Username = "Anonymous",
-                            IpAddress = ipAddress ?? "Unknown"
-                        };
-                        return Task.CompletedTask;
-                    });
-                }
-                else
-                {
-                    await SentrySdk.ConfigureScopeAsync(scope =>
-                    {
-                        scope.User = new User
-                        {
-                            Id = user.Id.ToString(),
-                            Username = user.Username,
-                            IpAddress = ipAddress ?? "Unknown"
-                        };
+                        Id = user?.Id.ToString() ?? "Unknown",
+                        Username = user?.Username ?? "Unknown",
+                        IpAddress = ipAddress ?? "Unknown"
+                    };
 
-                        return Task.CompletedTask;
-                    });
-                }
+                    return Task.CompletedTask;
+                });
             };
         });
     

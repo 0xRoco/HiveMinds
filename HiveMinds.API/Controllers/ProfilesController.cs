@@ -72,7 +72,7 @@ public class ProfilesController : ControllerBase
 
         account.Bio = dto.Bio;
 
-        var result = await _accountRepository.UpdateUser(account);
+        var result = await _accountRepository.UpdateAccount(account);
         if (!result)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.InternalServerError,
                 "Failed to update profile");
@@ -119,7 +119,7 @@ public class ProfilesController : ControllerBase
         account.ProfilePictureUrl =
             $"https://cdn.mdnite-vps.xyz/{targetBucket}/profile_images/{account.Id}/{imageName}";
 
-        var result = await _accountRepository.UpdateUser(account);
+        var result = await _accountRepository.UpdateAccount(account);
         if (!result)
             return ApiResponse<ProfileDto>.FailureResponse(HttpStatusCode.InternalServerError,
                 "Failed to update profile");

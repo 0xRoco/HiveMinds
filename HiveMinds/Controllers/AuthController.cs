@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HiveMinds.Controllers;
 
-[Route("[action]")]
+[Route("[action]"), Authorize]
 public class AuthController : Controller
 {
     private readonly ILogger<AuthController> _logger;
@@ -32,7 +32,6 @@ public class AuthController : Controller
     }
 
     [HttpGet]
-    [Authorize]
     public async Task<IActionResult> Logout()
     {
         Response.Cookies.Delete("token");
@@ -67,10 +66,11 @@ public class AuthController : Controller
                 Password = loginModel.Password
             });
 
-            if (loginResponse is { Success: false } || loginResponse.Data is null ||
+            if (loginResponse?.Data is null || loginResponse is { Success: false } ||
                 string.IsNullOrEmpty(loginResponse.Data.Token))
             {
-                ModelState.AddModelError("Login", loginResponse.Message);
+                ModelState.AddModelError("Login",
+                    loginResponse?.Message ?? "Login attempt failed - Invalid credentials");
                 return View(loginModel);
             }
 
@@ -106,7 +106,7 @@ public class AuthController : Controller
                 IsPersistent = loginModel.RememberMe,
                 ExpiresUtc = loginResponse.Data.Expiration
             });
-
+            
             return RedirectToAction("Index", "Home");
         }
         catch (Exception e)

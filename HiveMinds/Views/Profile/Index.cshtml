@@ -9,6 +9,12 @@
 
 <div class="container mt-5">
     <div class="row justify-content-center">
+        @if (Model.Profile.IsSuspended || Model.Profile.IsDeactivated)
+        {
+            <div class="alert alert-danger" role="alert">
+                <i>This account has been suspended or deactivated.</i>
+            </div>
+        }
         <div class="col-md-8">
             <div class="card mb-4 border-0">
                 <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
@@ -60,8 +66,9 @@
                 </div>
             </div>
 
-
-            <ul class="nav nav-tabs justify-content-center">
+            @if (Model.Profile is { IsDeactivated: false,IsSuspended: false })
+            {
+                <ul class="nav nav-tabs justify-content-center">
                 <li class="nav-item">
                     <a class="nav-link active" id="thoughts-tab" data-toggle="tab" href="#thoughts" role="tab" aria-controls="thoughts" aria-selected="true">Thoughts</a>
                 </li>
@@ -167,6 +174,7 @@
                     </div>
                 </div>
             </div>
+            }
         </div>
     </div>
 </div>

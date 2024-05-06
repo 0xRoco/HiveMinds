@@ -11,6 +11,8 @@ public class UserViewModel
     
     public List<ThoughtLike>? Likes { get; set; } = new();
     public bool IsVerified { get; set; }
+    public bool IsSuspended { get; set; }
+    public bool IsDeactivated { get; set; }
     public DateTime Joined { get; set; }
     public DateTime LastSeen { get; set; }
 }

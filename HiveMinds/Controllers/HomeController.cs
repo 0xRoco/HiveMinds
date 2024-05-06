@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HiveMinds.Controllers;
 
+[Authorize]
 public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
@@ -28,7 +29,6 @@ public class HomeController : Controller
     }
     
     [HttpGet]
-    [Authorize]
     public async Task<IActionResult> Index()
     {
         if (User.Identity is { IsAuthenticated: false }) return Challenge();

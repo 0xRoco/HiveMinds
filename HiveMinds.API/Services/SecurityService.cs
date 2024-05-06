@@ -48,15 +48,17 @@ public class SecurityService : ISecurityService
             new(ClaimTypes.Name, user.Username)
         };
 
-        var token = new JwtSecurityToken(
-            _configuration["Jwt:Issuer"],
-            _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: expiration,
-            signingCredentials: credentials
-        );
-        
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        var x = new SecurityTokenDescriptor()
+        {
+            Issuer = _configuration["Jwt:Issuer"],
+            Audience = _configuration["Jwt:Audience"],
+            Subject = new ClaimsIdentity(claims),
+            Expires = expiration,
+            SigningCredentials = credentials,
+            TokenType = "Bearer"
+        };
+
+        return new JwtSecurityTokenHandler().CreateEncodedJwt(x);
     }
 
     public string GenerateCode(int length = 6)

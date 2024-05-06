@@ -39,17 +39,13 @@ public class AuthService : IAuthService
 
     public async Task<Result<LoginResponseDto, AuthResults>> Login(LoginDto loginDto)
     {
-        _logger.LogInformation("Attempting to login user: {username}", loginDto.Username);
         var account = await _accountRepository.GetByUsername(loginDto.Username);
         if (account is null || !_securityService.VerifyPasswordHash(loginDto.Password, account.PasswordHash))
         {
-            _logger.LogInformation("Failed login attempt (Invalid username/password) for user: {username}",
-                loginDto.Username);
             return Result<LoginResponseDto, AuthResults>.Failure("Invalid username or password",
                 AuthResults.UsernameOrPasswordIncorrect);
         }
 
-        _logger.LogInformation("Successfully retrieved account for user: {username}", account.Username);
 
         if (account.Status != AccountStatus.Active)
         {
@@ -65,28 +61,22 @@ public class AuthService : IAuthService
         };
 
         await _accountRepository.UpdateLastLogin(account);
-        _logger.LogInformation("Updated last login for account: {username}", account.Username);
 
         return Result<LoginResponseDto, AuthResults>.Success(loginResponse);
     }
 
     public async Task<Result<int, AuthResults>> Signup(SignupDto signupDto)
     {
-        _logger.LogInformation("Attempting to signup user: {username}", signupDto.Username);
-
         var accountCheck = await _accountRepository.GetByUsername(signupDto.Username);
         if (accountCheck is not null)
         {
-            _logger.LogInformation("Sign up attempt failed, Username is already taken: {username}", signupDto.Username);
             return Result<int, AuthResults>.Failure("An account with the specified username already exists",
                 AuthResults.UsernameAlreadyExists);
         }
-
-        _logger.LogInformation("Username is available: {username}", signupDto.Username);
-
+        
         var account = _accountFactory.CreateAccountModel(signupDto);
 
-        var databaseResult = await _accountRepository.CreateUser(account);
+        var databaseResult = await _accountRepository.CreateAccount(account);
 
         if (!databaseResult)
         {
@@ -98,9 +88,7 @@ public class AuthService : IAuthService
         var emailBody = await _emailService.PrepareEmailBody("Data/emailTemplate.html", account);
 
         await _emailService.SendEmailAsync(signupDto.Email, "Verify Your HiveMinds Account", emailBody);
-
-        _logger.LogInformation("Successfully signed up user: {username}", signupDto.Username);
-
+        
         return Result<int, AuthResults>.Success(account.Id);
     }
 }

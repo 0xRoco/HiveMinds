@@ -1,4 +1,6 @@
-﻿namespace HiveMinds.DTO;
+﻿using HiveMinds.Common;
+
+namespace HiveMinds.DTO;
 
 public class UserDto
 {
@@ -7,5 +9,6 @@ public class UserDto
     public string ProfilePictureUrl { get; set; } = string.Empty;
     public string Bio { get; set; } = string.Empty;
     public bool IsVerified { get; set; }
+    public AccountStatus Status { get; set; }
     public DateTime CreatedAt { get; set; }
 }
